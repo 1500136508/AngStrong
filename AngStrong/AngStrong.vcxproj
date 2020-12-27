@@ -96,14 +96,24 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CameraDS.cpp" />
+    <ClCompile Include="graphicsrectitem.cpp" />
+    <ClCompile Include="imagepix.cpp" />
+    <ClCompile Include="imagescene.cpp" />
+    <ClCompile Include="imageview.cpp" />
     <ClCompile Include="titlebar.cpp" />
+    <ClCompile Include="View.cpp" />
+    <ClCompile Include="viewinfo.cpp" />
+    <ClCompile Include="viewtool.cpp" />
     <ClCompile Include="widgetui.cpp" />
     <QtRcc Include="angstrong.qrc" />
     <QtUic Include="angstrong.ui" />
     <QtMoc Include="angstrong.h" />
     <ClCompile Include="angstrong.cpp" />
     <ClCompile Include="main.cpp" />
+    <QtUic Include="imageview.ui" />
     <QtUic Include="titlebar.ui" />
+    <QtUic Include="viewinfo.ui" />
+    <QtUic Include="viewtool.ui" />
     <QtUic Include="widgetui.ui" />
   </ItemGroup>
   <ItemGroup>
@@ -114,6 +124,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraDS.h" />
+    <QtMoc Include="View.h" />
+    <QtMoc Include="imagescene.h" />
+    <QtMoc Include="imagepix.h" />
+    <QtMoc Include="graphicsrectitem.h" />
+    <QtMoc Include="viewtool.h" />
+    <QtMoc Include="viewinfo.h" />
+    <QtMoc Include="imageview.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">

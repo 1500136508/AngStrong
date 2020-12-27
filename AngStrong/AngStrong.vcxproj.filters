@@ -40,6 +40,18 @@
     <Filter Include="Source Files\Device\Camera">
       <UniqueIdentifier>{9937d4d0-3ce2-4ad5-8ddd-9fb92d248e25}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\View">
+      <UniqueIdentifier>{076d9ff6-11c0-4470-8221-ea677ff72447}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\View">
+      <UniqueIdentifier>{4eaa2a1d-5283-4c2e-8d23-e551cf8e0eb2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\View\ImageView">
+      <UniqueIdentifier>{3c6550cc-2bf9-47a8-864d-335e7757b7da}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\View\ImageView">
+      <UniqueIdentifier>{f0ab88b8-4723-4309-8e23-0f696f1d9a81}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="angstrong.qrc">
@@ -65,6 +77,27 @@
     <ClCompile Include="CameraDS.cpp">
       <Filter>Source Files\Device\Camera</Filter>
     </ClCompile>
+    <ClCompile Include="graphicsrectitem.cpp">
+      <Filter>Source Files\View\ImageView</Filter>
+    </ClCompile>
+    <ClCompile Include="imagepix.cpp">
+      <Filter>Source Files\View\ImageView</Filter>
+    </ClCompile>
+    <ClCompile Include="imagescene.cpp">
+      <Filter>Source Files\View\ImageView</Filter>
+    </ClCompile>
+    <ClCompile Include="imageview.cpp">
+      <Filter>Source Files\View\ImageView</Filter>
+    </ClCompile>
+    <ClCompile Include="viewinfo.cpp">
+      <Filter>Source Files\View\ImageView</Filter>
+    </ClCompile>
+    <ClCompile Include="viewtool.cpp">
+      <Filter>Source Files\View\ImageView</Filter>
+    </ClCompile>
+    <ClCompile Include="View.cpp">
+      <Filter>Source Files\View\ImageView</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="angstrong.ui">
@@ -76,6 +109,15 @@
     <QtUic Include="widgetui.ui">
       <Filter>Form Files</Filter>
     </QtUic>
+    <QtUic Include="imageview.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="viewinfo.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="viewtool.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="widgetui.h">
@@ -83,6 +125,27 @@
     </QtMoc>
     <QtMoc Include="titlebar.h">
       <Filter>Header Files\UI</Filter>
+    </QtMoc>
+    <QtMoc Include="graphicsrectitem.h">
+      <Filter>Header Files\View\ImageView</Filter>
+    </QtMoc>
+    <QtMoc Include="imagepix.h">
+      <Filter>Header Files\View\ImageView</Filter>
+    </QtMoc>
+    <QtMoc Include="imagescene.h">
+      <Filter>Header Files\View\ImageView</Filter>
+    </QtMoc>
+    <QtMoc Include="imageview.h">
+      <Filter>Header Files\View\ImageView</Filter>
+    </QtMoc>
+    <QtMoc Include="viewinfo.h">
+      <Filter>Header Files\View\ImageView</Filter>
+    </QtMoc>
+    <QtMoc Include="viewtool.h">
+      <Filter>Header Files\View\ImageView</Filter>
+    </QtMoc>
+    <QtMoc Include="View.h">
+      <Filter>Header Files\View\ImageView</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
