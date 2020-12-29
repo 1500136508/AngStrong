@@ -3,19 +3,19 @@
 ImageViewQScene::ImageViewQScene(QObject *parent /* = nullptr */)
 	:QGraphicsScene(parent)
 {
-
+	setBackgroundBrush(QBrush(QColor(128, 128, 128)));
 }
 
 ImageViewQScene::ImageViewQScene(const QRectF &sceneRect, QObject *parent /* = nullptr */)
 	:QGraphicsScene(sceneRect,parent)
 {
-
+	setBackgroundBrush(QBrush(QColor(128, 128, 128)));
 }
 
 ImageViewQScene::ImageViewQScene(qreal x, qreal y, qreal width, qreal height, QObject *parent /* = nullptr */)
 	: QGraphicsScene(x, y, width, height, parent)
 {
-
+	setBackgroundBrush(QBrush(QColor(128, 128, 128)));
 }
 
 ImageViewQScene::~ImageViewQScene()

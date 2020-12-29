@@ -17,8 +17,8 @@ public:
 
 	void BuildConnect();
 protected:
-	virtual void mouseDoubleClickEvent(QMouseEvent *event);
-	virtual void mousePressEvent(QMouseEvent *event);
+	virtual void mouseDoubleClickEvent(QMouseEvent *event)override;
+	virtual void mousePressEvent(QMouseEvent *event)override;
 protected slots:
 	void on_btn_min_clicked();
 	void on_btn_max_clicked();

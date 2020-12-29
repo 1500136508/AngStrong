@@ -115,12 +115,6 @@
     <QtUic Include="imageview.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtUic Include="imageview_qstatusbar.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
-    <QtUic Include="imageview_qtitlebar.ui">
-      <Filter>Form Files</Filter>
-    </QtUic>
     <QtUic Include="imageview_qtoolbar.ui">
       <Filter>Form Files</Filter>
     </QtUic>
@@ -160,6 +154,9 @@
   <ItemGroup>
     <ClInclude Include="CameraDS.h">
       <Filter>Header Files\Device\Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="definitionmenu.h">
+      <Filter>Header Files\View\ImageView</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

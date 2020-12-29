@@ -1,13 +1,13 @@
 #ifndef IMAGEVIEW_QTOOLBAR_H
 #define IMAGEVIEW_QTOOLBAR_H
 
-#include <QWidget>
+#include <QToolBar>
 
 namespace Ui {
 class ImageViewQToolBar;
 }
 
-class ImageViewQToolBar : public QWidget
+class ImageViewQToolBar : public QToolBar
 {
     Q_OBJECT
 
@@ -17,6 +17,7 @@ public:
 
 	void SetQssSheetStyle(QString sheet_style);
 private:
+	void InitializeUI();
 
     Ui::ImageViewQToolBar *ui;
 };

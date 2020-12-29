@@ -3,10 +3,6 @@
 
 #include <QWidget>
 
-namespace Ui {
-class ImageViewQTitleBar;
-}
-
 class ImageViewQTitleBar : public QWidget
 {
     Q_OBJECT
@@ -16,8 +12,10 @@ public:
     ~ImageViewQTitleBar();
 
 	void SetQssSheetStyle(QString sheet_style);
+protected:
+	void enterEvent(QEvent *event)override;
+	virtual void mousePressEvent(QMouseEvent *event)override;
 private:
-    Ui::ImageViewQTitleBar *ui;
 };
 
 #endif // IMAGEVIEW_QTITLEBAR_H

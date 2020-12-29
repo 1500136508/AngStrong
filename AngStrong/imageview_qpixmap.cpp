@@ -22,6 +22,7 @@ ImageViewQPixmap::~ImageViewQPixmap()
 void ImageViewQPixmap::SetFit(double scale)
 {
 	scale_ = scale;
+	setScale(scale_);
 }
 
 float ImageViewQPixmap::GetScale() const

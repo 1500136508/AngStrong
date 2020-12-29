@@ -7,10 +7,6 @@ namespace Ui {
 class ImageView;
 }
 
-class ImageViewQTitleBar;
-class ImageViewQToolBar;
-class ImageViewQView;
-class ImageViewQStatusBar;
 class ImageView : public QWidget
 {
     Q_OBJECT
@@ -18,21 +14,17 @@ class ImageView : public QWidget
 public:
     explicit ImageView(QWidget *parent = nullptr);
     ~ImageView();
+
+	void SetQssSheetStyle(QString sheet_style);
+	void SetTitle(QString title);
 protected:
-	void enterEvent(QEvent *event);
-	void leaveEvent(QEvent *event);
+	virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
 private:
 	void InitializeUI();
-	void SetQssSheetStyle(QString sheet_style);
-	void SetDefaultQssSheetStyle();
-
 	void ReleasePointer();
+	bool CreateBorderEvent(const QByteArray &eventType,void *message,long *result);
 
     Ui::ImageView *ui;
-	ImageViewQTitleBar *titlebar_;
-	ImageViewQToolBar *toolbar_;
-	ImageViewQView *view_;
-	ImageViewQStatusBar *statusbar_;
 };
 
 #endif // IMAGEVIEW_H

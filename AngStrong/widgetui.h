@@ -15,7 +15,7 @@ public:
     explicit WidgetUI(QWidget *parent = nullptr);
     ~WidgetUI();
 protected:
-	virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result);
+	virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
 private:
 	void SetWindowsProperty();
 

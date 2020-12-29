@@ -6,14 +6,119 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>784</width>
+    <height>540</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
+  <layout class="QGridLayout" name="gridLayout_2">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <property name="spacing">
+    <number>0</number>
+   </property>
+   <item row="0" column="0">
+    <widget class="ImageViewQTitleBar" name="m_titlebar" native="true">
+     <layout class="QGridLayout" name="gridLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <property name="spacing">
+       <number>0</number>
+      </property>
+      <item row="0" column="2">
+       <widget class="QPushButton" name="m_btn_max">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="angstrong.qrc">
+          <normaloff>:/AngStrong/image_ico/button/max_normal.png</normaloff>:/AngStrong/image_ico/button/max_normal.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="m_lab_title">
+        <property name="text">
+         <string>ImageView_Title</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="ImageViewQView" name="m_graphicsview">
+     <property name="mouseTracking">
+      <bool>true</bool>
+     </property>
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="2">
+    <widget class="ImageViewQStatusBar" name="m_statusbar"/>
+   </item>
+  </layout>
  </widget>
- <resources/>
+ <customwidgets>
+  <customwidget>
+   <class>ImageViewQView</class>
+   <extends>QGraphicsView</extends>
+   <header>imageview_qview.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ImageViewQTitleBar</class>
+   <extends>QWidget</extends>
+   <header>imageview_qtitlebar.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ImageViewQStatusBar</class>
+   <extends>QStatusBar</extends>
+   <header>imageview_qstatusbar.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources>
+  <include location="angstrong.qrc"/>
+ </resources>
  <connections/>
 </ui>

@@ -11,7 +11,10 @@ AngStrong::AngStrong(QWidget *parent)
 	titlebar_ui_(new TitleBar())
 {
     ui.setupUi(this);
-	ModifyUI();
+	InitializeUI();
+	//imageview_.setParent(this);
+	//imageview_.move(0, 50);
+	imageview_.SetTitle("ImageView00");
 	imageview_.show();
 }
 
@@ -29,7 +32,7 @@ AngStrong::~AngStrong()
 	}
 }
 
-void AngStrong::ModifyUI()
+void AngStrong::InitializeUI()
 {
 	CreateCustomMainWindow();
 	SetDefaultQssStyle();
@@ -48,7 +51,7 @@ void AngStrong::CreateCustomMainWindow()
 	main_widgets_ui_->show();//显示QWidge 最后添加
 }
 
-void AngStrong::SetQssStyle(QString style)
+void AngStrong::SetQssSheetStyle(QString style)
 {
 	this->setStyleSheet(style);
 	main_widgets_ui_->setStyleSheet(style);
@@ -63,5 +66,6 @@ void AngStrong::SetDefaultQssStyle()
 	QTextStream filetext(&file);
 	stylesheet = filetext.readAll();
 	file.close();
-	SetQssStyle(stylesheet);
+	SetQssSheetStyle(stylesheet);
+	imageview_.SetQssSheetStyle(stylesheet);
 }

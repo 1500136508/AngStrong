@@ -1,13 +1,9 @@
 #ifndef IMAGEVIEW_QSTATUSBAR_H
 #define IMAGEVIEW_QSTATUSBAR_H
 
-#include <QWidget>
+#include <QStatusBar>
 
-namespace Ui {
-class ImageViewQStatusBar;
-}
-
-class ImageViewQStatusBar : public QWidget
+class ImageViewQStatusBar : public QStatusBar
 {
     Q_OBJECT
 
@@ -17,8 +13,6 @@ public:
 
 	void SetQssSheetStyle(QString sheet_style);
 private:
-
-    Ui::ImageViewQStatusBar *ui;
 };
 
 #endif // IMAGEVIEW_QSTATUSBAR_H

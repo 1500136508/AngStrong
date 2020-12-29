@@ -13,10 +13,11 @@ class AngStrong : public QMainWindow
 public:
     AngStrong(QWidget *parent = Q_NULLPTR);
 	~AngStrong();
+
+	void SetQssSheetStyle(QString style);
 private:
-	void ModifyUI();
+	void InitializeUI();
 	void CreateCustomMainWindow();
-	void SetQssStyle(QString style);
 	void SetDefaultQssStyle();
 
     Ui::AngStrongClass ui;

@@ -1,21 +1,15 @@
 #include "imageview.h"
 #include "ui_imageview.h"
+#include <windows.h>
 #include <QHBoxLayout>
 #include <QGraphicsView>
 #include <QFile>
 #include <QTextStream>
-#include "imageview_qtitlebar.h"
-#include "imageview_qtoolbar.h"
-#include "imageview_qview.h"
-#include "imageview_qstatusbar.h"
+#include <QSplitter>
 
 ImageView::ImageView(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::ImageView)
-	,titlebar_(new ImageViewQTitleBar(parent))
-	,toolbar_(new ImageViewQToolBar(parent))
-	,view_(new ImageViewQView(parent))
-	,statusbar_(new ImageViewQStatusBar(parent))
 {
     ui->setupUi(this);
 	InitializeUI();
@@ -27,72 +21,85 @@ ImageView::~ImageView()
 	ReleasePointer();
 }
 
-void ImageView::enterEvent(QEvent * event)
+bool ImageView::nativeEvent(const QByteArray & eventType, void * message, long * result)
 {
-	toolbar_->setVisible(true);
-}
-
-void ImageView::leaveEvent(QEvent * event)
-{
-	toolbar_->setVisible(false);
+	CreateBorderEvent(eventType, message, result);
+	return QWidget::nativeEvent(eventType, message, result);
 }
 
 void ImageView::InitializeUI()
 {
 	setWindowFlag(Qt::FramelessWindowHint);
-	QGridLayout *pLayout = new QGridLayout(this);//创建一个整体布局器
-	pLayout->addWidget(titlebar_, 0, 0);
-	pLayout->addWidget(toolbar_, 1, 0);
-	pLayout->addWidget(view_, 2, 0);
-	pLayout->addWidget(statusbar_, 3, 0);
-	pLayout->setSpacing(0);         //布局之间的距离
-	pLayout->setContentsMargins(0, 0, 0, 0); //布局器的四周边距
-	setLayout(pLayout);  //将这个布局器设置在QWidget上
-	toolbar_->setVisible(false);
-
-	SetDefaultQssSheetStyle();
 }
 
 void ImageView::SetQssSheetStyle(QString sheet_style)
 {
 	setStyleSheet(sheet_style);
-	titlebar_->SetQssSheetStyle(sheet_style);
-	toolbar_->SetQssSheetStyle(sheet_style);
-	view_->SetQssSheetStyle(sheet_style);
-	statusbar_->SetQssSheetStyle(sheet_style);
 }
 
-void ImageView::SetDefaultQssSheetStyle()
+void ImageView::SetTitle(QString title)
 {
-	QString stylesheet;
-	QFile file("black.qss");
-	file.open(QFile::ReadOnly);
-	QTextStream filetext(&file);
-	stylesheet = filetext.readAll();
-	file.close();
-	SetQssSheetStyle(stylesheet);
+	ui->m_lab_title->setText(title);
 }
 
 void ImageView::ReleasePointer()
 {
-	if (titlebar_)
+}
+
+bool ImageView::CreateBorderEvent(const QByteArray & eventType, void * message, long * result)
+{
+	const int kBorder = 5;
+	MSG* pMsg = (MSG*)message;
+	switch (pMsg->message)
 	{
-		titlebar_->deleteLater();
-		titlebar_ = nullptr;
-	}
-	if (toolbar_)
+	case WM_NCHITTEST:
 	{
-		toolbar_->deleteLater();
-		toolbar_ = nullptr;
+		QPoint pos = mapFromGlobal(QPoint(LOWORD(pMsg->lParam), HIWORD(pMsg->lParam)));
+		bool bHorLeft = pos.x() < kBorder;
+		bool bHorRight = pos.x() > this->width() - kBorder;
+		bool bVertTop = pos.y() < kBorder;
+		bool bVertBottom = pos.y() > this->height() - kBorder;
+		if (bHorLeft && bVertTop)
+		{
+			*result = HTTOPLEFT;
+		}
+		else if (bHorLeft && bVertBottom)
+		{
+			*result = HTBOTTOMLEFT;
+		}
+		else if (bHorRight && bVertTop)
+		{
+			*result = HTTOPRIGHT;
+		}
+		else if (bHorRight && bVertBottom)
+		{
+			*result = HTBOTTOMRIGHT;
+		}
+		else if (bHorLeft)
+		{
+			*result = HTLEFT;
+		}
+		else if (bHorRight)
+		{
+			*result = HTRIGHT;
+		}
+		else if (bVertTop)
+		{
+			*result = HTTOP;
+		}
+		else if (bVertBottom)
+		{
+			*result = HTBOTTOM;
+		}
+		else
+		{
+			return false;
+		}
+		return true;
 	}
-	if (view_)
-	{
-		view_->deleteLater();
-		view_ = nullptr;
+	break;
+	default:
+		break;
 	}
-	if (statusbar_)
-	{
-		statusbar_->deleteLater();
-		statusbar_ = nullptr;
-	}
+	return false;
 }

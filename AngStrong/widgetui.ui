@@ -14,12 +14,12 @@
    <string>Angstrong</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="AngstrongDemo.qrc">
+   <iconset>
     <normaloff>:/AngstrongDemo/camera.ico</normaloff>:/AngstrongDemo/camera.ico</iconset>
   </property>
  </widget>
  <resources>
-  <include location="AngstrongDemo.qrc"/>
+  <include location="angstrong.qrc"/>
  </resources>
  <connections/>
 </ui>
