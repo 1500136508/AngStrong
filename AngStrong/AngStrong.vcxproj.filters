@@ -141,13 +141,13 @@
     <QtMoc Include="imageview_qview.h">
       <Filter>Header Files\View\ImageView</Filter>
     </QtMoc>
-    <QtMoc Include="imageview_qtoolbar.h">
-      <Filter>Header Files\View\ImageView</Filter>
-    </QtMoc>
     <QtMoc Include="imageview_qtitlebar.h">
       <Filter>Header Files\View\ImageView</Filter>
     </QtMoc>
     <QtMoc Include="imageview_qstatusbar.h">
+      <Filter>Header Files\View\ImageView</Filter>
+    </QtMoc>
+    <QtMoc Include="imageview_qtoolbar.h">
       <Filter>Header Files\View\ImageView</Filter>
     </QtMoc>
   </ItemGroup>

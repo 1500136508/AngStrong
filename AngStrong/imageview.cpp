@@ -35,6 +35,7 @@ void ImageView::InitializeUI()
 void ImageView::SetQssSheetStyle(QString sheet_style)
 {
 	setStyleSheet(sheet_style);
+	ui->m_graphicsview->SetQssSheetStyle(sheet_style);
 }
 
 void ImageView::SetTitle(QString title)

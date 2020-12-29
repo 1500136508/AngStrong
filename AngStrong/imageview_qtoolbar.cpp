@@ -2,7 +2,7 @@
 #include "ui_imageview_qtoolbar.h"
 
 ImageViewQToolBar::ImageViewQToolBar(QWidget *parent) :
-    QToolBar(parent),
+    QWidget(parent),
     ui(new Ui::ImageViewQToolBar)
 {
     ui->setupUi(this);

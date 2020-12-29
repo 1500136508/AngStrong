@@ -276,6 +276,7 @@ cv::Mat ImageViewQView::QImage2cvMat(QImage image)
 void ImageViewQView::SetQssSheetStyle(QString sheet_style)
 {
 	setStyleSheet(sheet_style);
+	imageview_toolbar_->SetQssSheetStyle(sheet_style);
 }
 
 void ImageViewQView::Zoom(QPointF pointF, double fScale)

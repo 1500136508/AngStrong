@@ -46,7 +46,6 @@ private:
 	void InitializeUI();
 	void CreateCustomRightButtonMenu();
 	void ReleasePointer();
-	int threadtest();
 
 	QImage cvMat2QImage(const cv::Mat& mat);
 	cv::Mat QImage2cvMat(QImage image);

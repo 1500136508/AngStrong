@@ -1,13 +1,13 @@
 #ifndef IMAGEVIEW_QTOOLBAR_H
 #define IMAGEVIEW_QTOOLBAR_H
 
-#include <QToolBar>
+#include <QWidget>
 
 namespace Ui {
 class ImageViewQToolBar;
 }
 
-class ImageViewQToolBar : public QToolBar
+class ImageViewQToolBar : public QWidget
 {
     Q_OBJECT
 
