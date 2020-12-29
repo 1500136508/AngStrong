@@ -7,9 +7,10 @@ namespace Ui {
 class ImageView;
 }
 
-class ViewInfo;
-class ViewTool;
-class QGraphicsView;
+class ImageViewQTitleBar;
+class ImageViewQToolBar;
+class ImageViewQView;
+class ImageViewQStatusBar;
 class ImageView : public QWidget
 {
     Q_OBJECT
@@ -21,10 +22,17 @@ protected:
 	void enterEvent(QEvent *event);
 	void leaveEvent(QEvent *event);
 private:
+	void InitializeUI();
+	void SetQssSheetStyle(QString sheet_style);
+	void SetDefaultQssSheetStyle();
+
+	void ReleasePointer();
+
     Ui::ImageView *ui;
-	QGraphicsView *graphics_view_ = nullptr;
-	ViewInfo *view_info_ = nullptr;
-	ViewTool *view_tool_ = nullptr;
+	ImageViewQTitleBar *titlebar_;
+	ImageViewQToolBar *toolbar_;
+	ImageViewQView *view_;
+	ImageViewQStatusBar *statusbar_;
 };
 
 #endif // IMAGEVIEW_H

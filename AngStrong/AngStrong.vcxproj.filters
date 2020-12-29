@@ -80,22 +80,25 @@
     <ClCompile Include="graphicsrectitem.cpp">
       <Filter>Source Files\View\ImageView</Filter>
     </ClCompile>
-    <ClCompile Include="imagepix.cpp">
-      <Filter>Source Files\View\ImageView</Filter>
-    </ClCompile>
-    <ClCompile Include="imagescene.cpp">
-      <Filter>Source Files\View\ImageView</Filter>
-    </ClCompile>
     <ClCompile Include="imageview.cpp">
       <Filter>Source Files\View\ImageView</Filter>
     </ClCompile>
-    <ClCompile Include="viewinfo.cpp">
+    <ClCompile Include="imageview_qview.cpp">
       <Filter>Source Files\View\ImageView</Filter>
     </ClCompile>
-    <ClCompile Include="viewtool.cpp">
+    <ClCompile Include="imageview_qscene.cpp">
       <Filter>Source Files\View\ImageView</Filter>
     </ClCompile>
-    <ClCompile Include="View.cpp">
+    <ClCompile Include="imageview_qpixmap.cpp">
+      <Filter>Source Files\View\ImageView</Filter>
+    </ClCompile>
+    <ClCompile Include="imageview_qstatusbar.cpp">
+      <Filter>Source Files\View\ImageView</Filter>
+    </ClCompile>
+    <ClCompile Include="imageview_qtitlebar.cpp">
+      <Filter>Source Files\View\ImageView</Filter>
+    </ClCompile>
+    <ClCompile Include="imageview_qtoolbar.cpp">
       <Filter>Source Files\View\ImageView</Filter>
     </ClCompile>
   </ItemGroup>
@@ -112,10 +115,13 @@
     <QtUic Include="imageview.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtUic Include="viewinfo.ui">
+    <QtUic Include="imageview_qstatusbar.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtUic Include="viewtool.ui">
+    <QtUic Include="imageview_qtitlebar.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="imageview_qtoolbar.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
@@ -129,22 +135,25 @@
     <QtMoc Include="graphicsrectitem.h">
       <Filter>Header Files\View\ImageView</Filter>
     </QtMoc>
-    <QtMoc Include="imagepix.h">
-      <Filter>Header Files\View\ImageView</Filter>
-    </QtMoc>
-    <QtMoc Include="imagescene.h">
-      <Filter>Header Files\View\ImageView</Filter>
-    </QtMoc>
     <QtMoc Include="imageview.h">
       <Filter>Header Files\View\ImageView</Filter>
     </QtMoc>
-    <QtMoc Include="viewinfo.h">
+    <QtMoc Include="imageview_qscene.h">
       <Filter>Header Files\View\ImageView</Filter>
     </QtMoc>
-    <QtMoc Include="viewtool.h">
+    <QtMoc Include="imageview_qpixmap.h">
       <Filter>Header Files\View\ImageView</Filter>
     </QtMoc>
-    <QtMoc Include="View.h">
+    <QtMoc Include="imageview_qview.h">
+      <Filter>Header Files\View\ImageView</Filter>
+    </QtMoc>
+    <QtMoc Include="imageview_qtoolbar.h">
+      <Filter>Header Files\View\ImageView</Filter>
+    </QtMoc>
+    <QtMoc Include="imageview_qtitlebar.h">
+      <Filter>Header Files\View\ImageView</Filter>
+    </QtMoc>
+    <QtMoc Include="imageview_qstatusbar.h">
       <Filter>Header Files\View\ImageView</Filter>
     </QtMoc>
   </ItemGroup>

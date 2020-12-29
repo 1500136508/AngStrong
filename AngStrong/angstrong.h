@@ -2,6 +2,7 @@
 
 #include <QtWidgets/QMainWindow>
 #include "ui_angstrong.h"
+#include "imageview.h"
 
 class WidgetUI;
 class TitleBar;
@@ -21,4 +22,5 @@ private:
     Ui::AngStrongClass ui;
 	WidgetUI *main_widgets_ui_;
 	TitleBar *titlebar_ui_;
+	ImageView imageview_;
 };

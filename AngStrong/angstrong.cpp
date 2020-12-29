@@ -12,6 +12,7 @@ AngStrong::AngStrong(QWidget *parent)
 {
     ui.setupUi(this);
 	ModifyUI();
+	imageview_.show();
 }
 
 AngStrong::~AngStrong()

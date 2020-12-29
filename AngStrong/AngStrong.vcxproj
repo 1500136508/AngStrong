@@ -55,6 +55,15 @@
       <AdditionalDependencies>strmiids.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>E:\Work\AngStrong\DirectShow\Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>E:\Work\AngStrong\DirectShow\Lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>strmiids.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="QtSettings">
     <QtInstall>msvc2017_64</QtInstall>
     <QtModules>core;gui;widgets</QtModules>
@@ -97,13 +106,14 @@
   <ItemGroup>
     <ClCompile Include="CameraDS.cpp" />
     <ClCompile Include="graphicsrectitem.cpp" />
-    <ClCompile Include="imagepix.cpp" />
-    <ClCompile Include="imagescene.cpp" />
     <ClCompile Include="imageview.cpp" />
+    <ClCompile Include="imageview_qpixmap.cpp" />
+    <ClCompile Include="imageview_qscene.cpp" />
+    <ClCompile Include="imageview_qstatusbar.cpp" />
+    <ClCompile Include="imageview_qtitlebar.cpp" />
+    <ClCompile Include="imageview_qtoolbar.cpp" />
+    <ClCompile Include="imageview_qview.cpp" />
     <ClCompile Include="titlebar.cpp" />
-    <ClCompile Include="View.cpp" />
-    <ClCompile Include="viewinfo.cpp" />
-    <ClCompile Include="viewtool.cpp" />
     <ClCompile Include="widgetui.cpp" />
     <QtRcc Include="angstrong.qrc" />
     <QtUic Include="angstrong.ui" />
@@ -111,9 +121,10 @@
     <ClCompile Include="angstrong.cpp" />
     <ClCompile Include="main.cpp" />
     <QtUic Include="imageview.ui" />
+    <QtUic Include="imageview_qstatusbar.ui" />
+    <QtUic Include="imageview_qtitlebar.ui" />
+    <QtUic Include="imageview_qtoolbar.ui" />
     <QtUic Include="titlebar.ui" />
-    <QtUic Include="viewinfo.ui" />
-    <QtUic Include="viewtool.ui" />
     <QtUic Include="widgetui.ui" />
   </ItemGroup>
   <ItemGroup>
@@ -124,12 +135,13 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CameraDS.h" />
-    <QtMoc Include="View.h" />
-    <QtMoc Include="imagescene.h" />
-    <QtMoc Include="imagepix.h" />
+    <QtMoc Include="imageview_qtoolbar.h" />
+    <QtMoc Include="imageview_qpixmap.h" />
+    <QtMoc Include="imageview_qscene.h" />
+    <QtMoc Include="imageview_qstatusbar.h" />
+    <QtMoc Include="imageview_qtitlebar.h" />
+    <QtMoc Include="imageview_qview.h" />
     <QtMoc Include="graphicsrectitem.h" />
-    <QtMoc Include="viewtool.h" />
-    <QtMoc Include="viewinfo.h" />
     <QtMoc Include="imageview.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
