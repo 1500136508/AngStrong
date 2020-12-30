@@ -1,9 +1,15 @@
 #pragma execution_character_set("utf-8")
 #include "imageview_qview.h"
+#include <windows.h>
+#include <dbt.h>
+#include <list>
 #include <QMenu>
 #include <QFileDialog>
 #include "definitionmenu.h"
 #include "imageview_qview.h"
+#include "CameraDS.h"
+#include "logmanager.h"
+#include "definition_camera.h"
 
 ImageViewQView::ImageViewQView(QWidget *pParent /* = nullptr */)
 	:QGraphicsView(pParent)
@@ -11,8 +17,11 @@ ImageViewQView::ImageViewQView(QWidget *pParent /* = nullptr */)
 	,imageview_qpix_(std::make_shared<ImageViewQPixmap>(new ImageViewQPixmap()))
 	,imageview_rect_item_(std::make_shared<GraphicsRectItem>(new GraphicsRectItem()))
 	,imageview_toolbar_(std::make_shared<ImageViewQToolBar>(new ImageViewQToolBar()))
+	,camera_(new CameraDS())
 {
 	InitializeUI();
+	BuildConnect();
+	for (int i = 0; i < 3; i++) container_.push_back(cv::Mat());
 }
 
 ImageViewQView::ImageViewQView(QGraphicsScene *scene, QWidget *parent /* = nullptr */)
@@ -21,13 +30,122 @@ ImageViewQView::ImageViewQView(QGraphicsScene *scene, QWidget *parent /* = nullp
 	, imageview_qpix_(std::make_shared<ImageViewQPixmap>(new ImageViewQPixmap()))
 	, imageview_rect_item_(std::make_shared<GraphicsRectItem>(new GraphicsRectItem()))
 	, imageview_toolbar_(std::make_shared<ImageViewQToolBar>(new ImageViewQToolBar()))
+	, camera_(new CameraDS())
 {
 	InitializeUI();
 }
 
 ImageViewQView::~ImageViewQView()
 {
+	CloseCamera();
 	ReleasePointer();
+}
+
+bool ImageViewQView::OpenCamera(const int camera_id, const int widht, const int height, bool is_YUV2)
+{
+	bool bReturn = false;
+	do
+	{
+		if (!camera_->Initialize())
+			break;
+
+		if (!camera_->SetCameraDevice(camera_id))
+			break;
+		if (!camera_->AddCaptureVideoFilter())
+			break;
+		if (!camera_->SetCameraFormat(camera_id, widht, height, is_YUV2))
+			break;
+		camera_->SetCallBack(grabimage_callback_function_);
+
+		int w = camera_->GetCameraWidth();
+		int h = camera_->GetCameraHeight();
+		//camera_->Run();
+		bReturn = true;
+	} while (false);
+	return bReturn;
+}
+
+bool ImageViewQView::CloseCamera()
+{
+	bool bReturn = false;
+	do
+	{
+		if (!camera_->Terminate())
+			break;
+		bReturn = false;
+	} while (false);
+	return bReturn;
+}
+
+void ImageViewQView::SetGrabImageCallBack(ISampleGrabberCB * callback)
+{
+	grabimage_callback_function_ = callback;
+}
+
+void ImageViewQView::DisplayImage(cv::Mat image_rgb, cv::Mat image_depth, cv::Mat image_ir)
+{
+	try
+	{
+		int display_mode = imageview_toolbar_->get_current_display_mode();
+		switch (display_mode)
+		{
+		case EDisplayMode_IR_Depth_RGB:
+		{
+			image_ir.copyTo(container_[0]);
+			image_depth.copyTo(container_[1]);
+			image_rgb.copyTo(container_[2]);
+			cv::hconcat(container_, combine_image_);
+		}
+		break;
+		case EDisplayMode_IR:
+		{
+			combine_image_ = image_ir;
+		}
+		break;
+		case EDisplayMode_Depth:
+		{
+			combine_image_ = image_depth;
+		}
+		break;
+		case EDisplayMode_RGB:
+		{
+			combine_image_ = image_rgb;
+		}
+		break;
+		case EDisplayMode_IR_Depth_RGBAddDepth:
+		{
+			cv::Mat plus = image_rgb / 2 + image_depth / 2;
+			plus.copyTo(container_[2]);
+			cv::hconcat(container_, combine_image_);
+		}
+		break;
+		default:
+			break;
+		}
+
+		if (imageview_qpix_)
+		{
+			qImage = cvMat2QImage(combine_image_);
+			m_ImageWidth = qImage.width();
+			m_ImageHeight = qImage.height();
+			if (!qImage.isNull())
+			{
+				imageview_qpix_->setPixmap(QPixmap::fromImage(qImage));
+				imageview_qpix_->setScale(imageview_qpix_->GetScale());
+				if (first_time_to_live_)
+				{
+					ZoomFit();
+					first_time_to_live_ = false;
+				}
+			}
+		}
+	}
+	catch (cv::Exception &e)
+	{
+		std::string err_msg = e.what();
+		LogManager::Write(err_msg);
+		return;
+	}
 }
 
 void ImageViewQView::mouseMoveEvent(QMouseEvent * event)
@@ -55,6 +173,16 @@ void ImageViewQView::paintEvent(QPaintEvent * event)
 	return QGraphicsView::paintEvent(event);
 }
 
+void ImageViewQView::resizeEvent(QResizeEvent *)
+{
+	ZoomFit();
+	imageview_toolbar_->setParent(this);
+	QRect view_size = geometry();
+	imageview_toolbar_->resize(QSize(view_size.width(), 25));
+	imageview_toolbar_->move(0, 0);
+	imageview_toolbar_->show();
+}
+
 void ImageViewQView::contextMenuEvent(QContextMenuEvent * event)
 {
 	CreateCustomRightButtonMenu();
@@ -71,7 +199,49 @@ void ImageViewQView::enterEvent(QEvent * event)
 
 void ImageViewQView::leaveEvent(QEvent * event)
 {
-	imageview_toolbar_->hide();
+	//imageview_toolbar_->hide();
+}
+
+bool ImageViewQView::nativeEvent(const QByteArray & eventType, void * message, long * result)
+{
+	MSG* msg = reinterpret_cast<MSG*>(message);
+	int msgType = msg->message;
+	if (msgType == WM_DEVICECHANGE)
+	{
+		imageview_toolbar_->FindAllPort();
+		UpdataCameraList();
+		PDEV_BROADCAST_HDR lpdb = (PDEV_BROADCAST_HDR)msg->lParam;
+		switch (msg->wParam)
+		{
+		case DBT_DEVICEARRIVAL:
+		{
+			if (lpdb->dbch_devicetype = DBT_DEVTYP_DEVICEINTERFACE)
+			{
+				Sleep(50);
+				/*LogManager::Write("检测到插入相机");
+				InitCamera();
+				m_ParamView.FindAllPort();*/
+			}
+		}
+		break;
+		case DBT_DEVICEREMOVECOMPLETE:
+		{
+			if (lpdb->dbch_devicetype = DBT_DEVTYP_DEVICEINTERFACE)
+			{
+				int a = 0;
+				//LogManager::Write("检测到拔出相机");
+				//if (!m_pMainImageView->m_pCamera->CameraIsStillHere())
+				//{
+				//	emit m_pMainImageView->SendCameraStatus(ECameraStatus_Close);
+				//}
+				//InitCamera();//检查camera
+				//m_ParamView.FindAllPort();
+			}
+			break;
+		}
+		}
+	}
+	return QWidget::nativeEvent(eventType, message, result);
 }
 
 void ImageViewQView::on_open_clicked()
@@ -113,13 +283,53 @@ void ImageViewQView::on_measureCircle_clicked()
 {
 }
 
+void ImageViewQView::ReceiveLiveTriggered()
+{
+	camera_->Run();
+}
+
+void ImageViewQView::ReceivePauseTriggered()
+{
+	camera_->Pause();
+}
+
+void ImageViewQView::ReceiveStopTriggered()
+{
+	camera_->Stop();
+}
+
+void ImageViewQView::ReceiveCaptureFilterTriggered()
+{
+	camera_->ShowCameraCaptureFilterDialog();
+}
+
+void ImageViewQView::ReceiveCapturePinTriggered()
+{
+	camera_->ShowCmaeraCapturePinDialog();
+}
+
 void ImageViewQView::InitializeUI()
 {
 	setAttribute(Qt::WA_DeleteOnClose);
 	imageview_qscene_->addItem(imageview_qpix_.get());//添加像元元素绑定到Scene
 	setScene(imageview_qscene_.get());//将QGraphicsView添加Scene;
 	setMouseTracking(true);
+
+	RegisterDevice();
+	imageview_toolbar_->FindAllPort();
+	UpdataCameraList();
 	imageview_toolbar_->hide();
+}
+
+void ImageViewQView::BuildConnect()
+{
+	connect(imageview_toolbar_.get(), SIGNAL(send_open_camera_triggered()), this, SLOT(ReceiveOpenCameraTriggered()));
+	connect(imageview_toolbar_.get(), SIGNAL(send_close_camera_triggered()), this, SLOT(ReceiveCloseCameraTriggered()));
+	connect(imageview_toolbar_.get(), SIGNAL(send_live_triggered()), this, SLOT(ReceiveLiveTriggered()));
+	connect(imageview_toolbar_.get(), SIGNAL(send_pause_triggered()), this, SLOT(ReceivePauseTriggered()));
+	connect(imageview_toolbar_.get(), SIGNAL(send_stop_triggered()), this, SLOT(ReceiveStopTriggered()));
+	connect(imageview_toolbar_.get(), SIGNAL(send_capture_filter_triggered()), this, SLOT(ReceiveCaptureFilterTriggered()));
+	connect(imageview_toolbar_.get(), SIGNAL(send_capture_pin_triggered()), this, SLOT(ReceiveCapturePinTriggered()));
 }
 
 void ImageViewQView::CreateCustomRightButtonMenu()
@@ -213,6 +423,89 @@ void ImageViewQView::CreateCustomRightButtonMenu()
 
 void ImageViewQView::ReleasePointer()
 {
+	if (camera_)
+	{
+		delete camera_;
+		camera_ = nullptr;
+	}
+}
+
+void ImageViewQView::RegisterDevice()
+{
+	const GUID GUID_DEVINTERFACE_LIST[] =
+	{
+		{ 0xA5DCBF10, 0x6530, 0x11D2, { 0x90, 0x1F, 0x00, 0xC0, 0x4F, 0xB9, 0x51, 0xED } },
+		{ 0x53f56307, 0xb6bf, 0x11d0, { 0x94, 0xf2, 0x00, 0xa0, 0xc9, 0x1e, 0xfb, 0x8b } }
+	};
+
+	HDEVNOTIFY hDevNotify;
+	DEV_BROADCAST_DEVICEINTERFACE NotifacationFiler;
+	ZeroMemory(&NotifacationFiler, sizeof(DEV_BROADCAST_DEVICEINTERFACE));
+	NotifacationFiler.dbcc_size = sizeof(DEV_BROADCAST_DEVICEINTERFACE);
+	NotifacationFiler.dbcc_devicetype = DBT_DEVTYP_DEVICEINTERFACE;
+
+	for (int i = 0; i < sizeof(GUID_DEVINTERFACE_LIST) / sizeof(GUID); i++)
+	{
+		NotifacationFiler.dbcc_classguid = GUID_DEVINTERFACE_LIST[i];
+
+		hDevNotify = RegisterDeviceNotification((HANDLE)this->winId(), &NotifacationFiler, DEVICE_NOTIFY_WINDOW_HANDLE);
+		if (!hDevNotify)
+		{
+			//qDebug() << QStringLiteral("注册失败！") <<endl;
+#ifdef DEBUG
+			qDebug() << QStringLiteral("error") << endl;
+#endif // DEBUG
+		}
+	}
+}
+
+void ImageViewQView::SetImage(cv::Mat mat)
+{
+	if (imageview_qpix_)
+	{
+		qImage = cvMat2QImage(mat);
+		m_ImageWidth = qImage.width();
+		m_ImageHeight = qImage.height();
+		if (!qImage.isNull())
+		{
+			imageview_qpix_->setPixmap(QPixmap::fromImage(qImage));
+			imageview_qpix_->setScale(imageview_qpix_->GetScale());
+		}
+	}
+}
+
+void ImageViewQView::ReceiveOpenCameraTriggered()
+{
+	int camera_index = imageview_toolbar_->get_current_camera_index();
+	if (camera_index < 0)
+	{
+		LogManager::Write("Failed to Live:No Camera!");
+		return;
+	}
+	OpenCamera(camera_index, 640, 480, true);
+}
+
+void ImageViewQView::ReceiveCloseCameraTriggered()
+{
+	CloseCamera();
+}
+
+void ImageViewQView::UpdataCameraList()
+{
+	std::list<std::string> camera_name_list;
+	camera_name_list.clear();
+	auto camera_counts = camera_->CameraCount();
+	if (camera_counts > 0)
+	{
+		char camera_name_char[100];
+		for (auto i = 0; i < camera_counts; i++)
+		{
+			camera_->GetCameraName(i, camera_name_char, 100);
+			std::string camera_name_string(camera_name_char);
+			camera_name_list.push_back(camera_name_string);
+		}
+	}
+	imageview_toolbar_->InitialzeCameraList(camera_name_list);
 }
 
 QImage ImageViewQView::cvMat2QImage(const cv::Mat & mat)

@@ -2,11 +2,13 @@
 #define IMAGEVIEW_H
 
 #include <QWidget>
+#include <opencv.hpp>
 
 namespace Ui {
 class ImageView;
 }
 
+class ISampleGrabberCB;
 class ImageView : public QWidget
 {
     Q_OBJECT
@@ -17,14 +19,18 @@ public:
 
 	void SetQssSheetStyle(QString sheet_style);
 	void SetTitle(QString title);
+	void SetGrabImageCallBack(ISampleGrabberCB *callback);
 protected:
 	virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
+private slots:
+	void ReceiveImage(cv::Mat image_rgb,cv::Mat image_depth,cv::Mat image_ir);
 private:
 	void InitializeUI();
 	void ReleasePointer();
 	bool CreateBorderEvent(const QByteArray &eventType,void *message,long *result);
 
     Ui::ImageView *ui;
+	ISampleGrabberCB *grabimage_callback_ = nullptr;
 };
 
 #endif // IMAGEVIEW_H

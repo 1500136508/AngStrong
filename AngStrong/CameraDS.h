@@ -44,6 +44,9 @@ public:
 	void ShowCameraCaptureFilterDialog();
 	void ShowCmaeraCapturePinDialog();
 
+	int GetCameraWidth();
+	int GetCameraHeight();
+
 	bool CreateInterfaces();
 	bool AddCaptureVideoFilter();
 	bool RenderCamera(ECapture_Mode mode);
@@ -51,6 +54,7 @@ public:
 	bool SetCameraDevice(const int device_id);
 	int CameraCount();
 	std::string GetCameraName(const int device_id);
+	bool GetCameraName(int nCamID, char* sName, int nBufferSize);
 private:
 	bool GetCameraDevice(const int device_id, IBaseFilter **device_filter);
 
@@ -70,5 +74,7 @@ private:
 	bool is_init_;
 	ECameraStatus camera_status_ = ECameraStatus_Unknow;
 	DWORD g_dwGraphRegister_;
+
+	ISampleGrabberCB *callback_function_;
 };
 

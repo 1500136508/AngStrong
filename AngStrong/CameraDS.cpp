@@ -1,6 +1,7 @@
 #include "CameraDS.h"
 #include <atlbase.h>
 #include <string>
+#include <comutil.h>
 
 #define MYFREEMEDIATYPE(mt)	{if ((mt).cbFormat != 0)		\
                     {CoTaskMemFree((PVOID)(mt).pbFormat);	\
@@ -29,6 +30,8 @@ CameraDS::CameraDS()
 
 	video_window_ = nullptr;
 	camera_stream_format_config_ = nullptr;
+
+	callback_function_ = nullptr;
 }
 
 CameraDS::~CameraDS()
@@ -288,7 +291,11 @@ void CameraDS::SetCallBack(ISampleGrabberCB *callback_function)
 {
 	sample_grabber_->SetBufferSamples(TRUE);
 	sample_grabber_->SetOneShot(FALSE);
-	sample_grabber_->SetCallback(callback_function, 1);
+	if (!callback_function_)
+	{
+		callback_function_ = callback_function;
+	}
+	sample_grabber_->SetCallback(callback_function_, 1);
 }
 
 HRESULT CameraDS::AddGraphToRot(IUnknown * pUnkGraph, DWORD * pdwRegister)
@@ -396,7 +403,44 @@ void CameraDS::ShowCmaeraCapturePinDialog()
 		camera_stream_format_config_->Release();
 	}
 	RenderCamera(ECapture_Mode_Capture);
+	SetCallBack(callback_function_);
 	Run();
+}
+
+int CameraDS::GetCameraWidth()
+{
+	if (!is_init_)
+	{
+		return -1;
+	}
+	AM_MEDIA_TYPE mt;
+	HRESULT hr = sample_grabber_->GetConnectedMediaType(&mt);
+	if (FAILED(hr))
+	{
+		return -1;
+	}
+
+	VIDEOINFOHEADER *videoHeader;
+	videoHeader = reinterpret_cast<VIDEOINFOHEADER*>(mt.pbFormat);
+	return videoHeader->bmiHeader.biWidth;
+}
+
+int CameraDS::GetCameraHeight()
+{
+	if (!is_init_)
+	{
+		return -1;
+	}
+	AM_MEDIA_TYPE mt;
+	HRESULT hr = sample_grabber_->GetConnectedMediaType(&mt);
+	if (FAILED(hr))
+	{
+		return -1;
+	}
+
+	VIDEOINFOHEADER *videoHeader;
+	videoHeader = reinterpret_cast<VIDEOINFOHEADER*>(mt.pbFormat);
+	return videoHeader->bmiHeader.biHeight;
 }
 
 void CameraDS::RemoveConnections(IBaseFilter * filter)
@@ -719,7 +763,7 @@ std::string CameraDS::GetCameraName(const int device_id)
 	pEm->Reset();
 	ULONG cFetched;
 	IMoniker *pM = nullptr;
-	LPSTR camera_name("");
+	char *camera_name = nullptr;
 	int count = 0;
 	while (hr = pEm->Next(1, &pM, &cFetched), hr == S_OK)
 	{
@@ -752,4 +796,57 @@ std::string CameraDS::GetCameraName(const int device_id)
 	pEm = NULL;
 
 	return camera_name;
+}
+
+bool CameraDS::GetCameraName(int nCamID, char * sName, int nBufferSize)
+{
+	bool bReturn = false;
+	do 
+	{
+		int count = 0;
+		//CoInitialize(NULL);
+
+		// enumerate all video capture devices
+		CComPtr<ICreateDevEnum> pCreateDevEnum;
+		HRESULT hr = CoCreateInstance(CLSID_SystemDeviceEnum, NULL, CLSCTX_INPROC_SERVER, IID_ICreateDevEnum, (void**)&pCreateDevEnum);
+
+		CComPtr<IEnumMoniker> pEm;
+		hr = pCreateDevEnum->CreateClassEnumerator(CLSID_VideoInputDeviceCategory, &pEm, 0);
+		if (hr != NOERROR) break;
+
+		pEm->Reset();
+		ULONG cFetched;
+		IMoniker *pM;
+		while (hr = pEm->Next(1, &pM, &cFetched), hr == S_OK)
+		{
+			if (count == nCamID)
+			{
+				IPropertyBag *pBag = 0;
+				hr = pM->BindToStorage(0, 0, IID_IPropertyBag, (void **)&pBag);
+				if (SUCCEEDED(hr))
+				{
+					VARIANT var;
+					var.vt = VT_BSTR;
+					hr = pBag->Read(L"FriendlyName", &var, NULL); //还有其他属性,像描述信息等等...
+					if (hr == NOERROR)
+					{
+						//获取设备名称
+						WideCharToMultiByte(CP_ACP, 0, var.bstrVal, -1, sName, nBufferSize, "", NULL);
+
+						SysFreeString(var.bstrVal);
+					}
+					pBag->Release();
+				}
+				pM->Release();
+
+				break;
+			}
+			count++;
+		}
+		pCreateDevEnum = NULL;
+		pEm = NULL;
+
+		bReturn = true;
+	} while (false);
+	return bReturn;
 }

@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QSplitter>
+#include <qedit.h>
 
 ImageView::ImageView(QWidget *parent) :
     QWidget(parent),
@@ -41,6 +42,15 @@ void ImageView::SetQssSheetStyle(QString sheet_style)
 void ImageView::SetTitle(QString title)
 {
 	ui->m_lab_title->setText(title);
+}
+
+void ImageView::SetGrabImageCallBack(ISampleGrabberCB * callback)
+{
+	if (!grabimage_callback_)
+	{
+		grabimage_callback_ = callback;
+	}
+	ui->m_graphicsview->SetGrabImageCallBack(grabimage_callback_);
 }
 
 void ImageView::ReleasePointer()
@@ -103,4 +113,9 @@ bool ImageView::CreateBorderEvent(const QByteArray & eventType, void * message, 
 		break;
 	}
 	return false;
+}
+
+void ImageView::ReceiveImage(cv::Mat image_rgb, cv::Mat image_depth, cv::Mat image_ir)
+{
+	ui->m_graphicsview->DisplayImage(image_rgb,image_depth,image_ir);
 }

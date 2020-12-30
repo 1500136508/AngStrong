@@ -52,6 +52,18 @@
     <Filter Include="Source Files\View\ImageView">
       <UniqueIdentifier>{f0ab88b8-4723-4309-8e23-0f696f1d9a81}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Model">
+      <UniqueIdentifier>{72d9b4f7-239e-4bde-ab41-3d76738a3bcf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Model">
+      <UniqueIdentifier>{7c8eda05-65ad-447c-8214-5177a25610fd}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Device\USBDevice">
+      <UniqueIdentifier>{0c7614f6-e426-45b1-b973-147f312cbbad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Device\USBDevice">
+      <UniqueIdentifier>{5dcd6295-0878-4176-aa24-81bfc36d7ad2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="angstrong.qrc">
@@ -101,6 +113,21 @@
     <ClCompile Include="imageview_qtoolbar.cpp">
       <Filter>Source Files\View\ImageView</Filter>
     </ClCompile>
+    <ClCompile Include="modelparameter.cpp">
+      <Filter>Source Files\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="EnumSerial.cpp">
+      <Filter>Source Files\Device\USBDevice</Filter>
+    </ClCompile>
+    <ClCompile Include="logmanager.cpp">
+      <Filter>Source Files\Model</Filter>
+    </ClCompile>
+    <ClCompile Include="eventhandler_grabimage.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="displayview.cpp">
+      <Filter>Source Files\View</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="angstrong.ui">
@@ -116,6 +143,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="imageview_qtoolbar.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="displayview.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
@@ -141,14 +171,20 @@
     <QtMoc Include="imageview_qview.h">
       <Filter>Header Files\View\ImageView</Filter>
     </QtMoc>
+    <QtMoc Include="imageview_qtoolbar.h">
+      <Filter>Header Files\View\ImageView</Filter>
+    </QtMoc>
     <QtMoc Include="imageview_qtitlebar.h">
       <Filter>Header Files\View\ImageView</Filter>
     </QtMoc>
     <QtMoc Include="imageview_qstatusbar.h">
       <Filter>Header Files\View\ImageView</Filter>
     </QtMoc>
-    <QtMoc Include="imageview_qtoolbar.h">
-      <Filter>Header Files\View\ImageView</Filter>
+    <QtMoc Include="eventhandler_grabimage.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="displayview.h">
+      <Filter>Header Files\View</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
@@ -157,6 +193,18 @@
     </ClInclude>
     <ClInclude Include="definitionmenu.h">
       <Filter>Header Files\View\ImageView</Filter>
+    </ClInclude>
+    <ClInclude Include="definition_camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="modelparameter.h">
+      <Filter>Header Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="EnumSerial.h">
+      <Filter>Header Files\Device\USBDevice</Filter>
+    </ClInclude>
+    <ClInclude Include="logmanager.h">
+      <Filter>Header Files\Model</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
