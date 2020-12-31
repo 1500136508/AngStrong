@@ -18,6 +18,7 @@ ImageViewQToolBar::ImageViewQToolBar(QWidget *parent) :
 ImageViewQToolBar::~ImageViewQToolBar()
 {
     delete ui;
+	ReleasePointer();
 }
 
 void ImageViewQToolBar::SetQssSheetStyle(QString sheet_style)
@@ -63,6 +64,10 @@ void ImageViewQToolBar::BuildConnect()
 	connect(ui->m_action_stop, SIGNAL(triggered()), this, SLOT(on_stop_triggered()));
 	connect(ui->m_action_capture_filter, SIGNAL(triggered()), this, SLOT(on_capture_filter_triggered()));
 	connect(ui->m_action_capture_pin, SIGNAL(triggered()), this, SLOT(on_capture_pin_triggered()));
+}
+
+void ImageViewQToolBar::ReleasePointer()
+{
 }
 
 void ImageViewQToolBar::FindAllPort()
@@ -116,6 +121,21 @@ int ImageViewQToolBar::get_current_display_mode()
 int ImageViewQToolBar::get_current_grab_mode()
 {
 	return ui->m_combo_grab_mode->currentIndex();
+}
+
+int ImageViewQToolBar::get_current_port()
+{
+	std::string port_name = ui->m_combo_port->currentText().toStdString();
+	if (port_name.empty())
+	{
+		return -1;
+	}
+	int M_position = port_name.find("M");
+	auto iter_b = port_name.cbegin() + M_position + 1;
+	auto iter_e = port_name.cend();
+	std::string port_no(iter_b, iter_e);
+	int port = std::stoi(port_no);
+	return port;
 }
 
 void ImageViewQToolBar::on_open_camera_triggered()

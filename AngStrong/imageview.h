@@ -9,6 +9,7 @@ class ImageView;
 }
 
 class ISampleGrabberCB;
+class EventHandler;
 class ImageView : public QWidget
 {
     Q_OBJECT
@@ -20,6 +21,7 @@ public:
 	void SetQssSheetStyle(QString sheet_style);
 	void SetTitle(QString title);
 	void SetGrabImageCallBack(ISampleGrabberCB *callback);
+	void AddEventHandler(EventHandler *event_handler);
 protected:
 	virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
 private slots:

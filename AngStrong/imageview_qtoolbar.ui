@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>829</width>
-    <height>33</height>
+    <height>99</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -34,7 +34,13 @@
      <property name="maximumSize">
       <size>
        <width>16777215</width>
-       <height>25</height>
+       <height>50</height>
+      </size>
+     </property>
+     <property name="iconSize">
+      <size>
+       <width>48</width>
+       <height>48</height>
       </size>
      </property>
      <addaction name="m_action_open_camera"/>
@@ -53,7 +59,7 @@
      <property name="maximumSize">
       <size>
        <width>16777215</width>
-       <height>25</height>
+       <height>50</height>
       </size>
      </property>
     </widget>
@@ -63,7 +69,7 @@
      <property name="maximumSize">
       <size>
        <width>16777215</width>
-       <height>25</height>
+       <height>50</height>
       </size>
      </property>
     </widget>
@@ -73,7 +79,7 @@
      <property name="maximumSize">
       <size>
        <width>16777215</width>
-       <height>25</height>
+       <height>50</height>
       </size>
      </property>
     </widget>
@@ -83,7 +89,7 @@
      <property name="maximumSize">
       <size>
        <width>16777215</width>
-       <height>25</height>
+       <height>50</height>
       </size>
      </property>
     </widget>

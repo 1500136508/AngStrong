@@ -50,6 +50,11 @@ void DisplayView::ReceiveDeviceSNData(QString message)
 	ui->m_lab_device_sn->setText(message);
 }
 
+void DisplayView::ReceiveSN(QString sn)
+{
+	ui->m_lab_read_sn->setText(sn);
+}
+
 void DisplayView::UpdataUIMessage()
 {
 	ui->m_lab_device_sn->setText("--");
@@ -62,6 +67,5 @@ void DisplayView::ReceiveLocationDepth(int x, int y, float depth)
 #if DEBUG
 	qDebug() << depth;
 #endif
-	ui->m_lab_mouse_xy->setText("X:" + QString::number(x) + " Y:" + QString::number(y));
 	ui->m_lab_depth->setText(info);
 }

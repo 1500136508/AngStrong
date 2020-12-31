@@ -9,6 +9,7 @@
 
 class CameraDS;
 class ISampleGrabberCB;
+class EventHandler;
 class ImageViewQView : public QGraphicsView
 {
 	Q_OBJECT
@@ -17,6 +18,7 @@ public:
 	ImageViewQView(QGraphicsScene *scene, QWidget *parent = nullptr);
 	virtual ~ImageViewQView();
 
+	void AddEventHandler(EventHandler *event_handler);
 	bool OpenCamera(const int camera_id, const int widht, const int height, bool is_YUV2 = false);
 	bool CloseCamera();
 	void SetGrabImageCallBack(ISampleGrabberCB *callback);
@@ -69,6 +71,7 @@ private:
 	void RegisterDevice();//×¢²ánativeEvent;
 
 	void UpdataCameraList();
+	void CalcInfo(QPointF point);
 
 	QImage cvMat2QImage(const cv::Mat& mat);
 	cv::Mat QImage2cvMat(QImage image);
@@ -77,8 +80,9 @@ private:
 	std::shared_ptr<ImageViewQPixmap>			imageview_qpix_;
 	std::shared_ptr<GraphicsRectItem>			imageview_rect_item_;
 	std::shared_ptr<ImageViewQToolBar>			imageview_toolbar_;
-	CameraDS									*camera_;
+	CameraDS									*camera_ = nullptr;
 	ISampleGrabberCB							*grabimage_callback_function_ = nullptr;
+	EventHandler								*event_handler_ = nullptr;
 
 	cv::Mat m_Image;
 	QImage qImage;

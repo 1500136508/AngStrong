@@ -3,38 +3,32 @@
 #include <QTextStream>
 #include <QGridLayout>
 #include <QDockWidget>
+#include <QKeyEvent>
 #include "widgetui.h"
 #include "titlebar.h"
 #include "eventhandler_grabimage.h"
+#include "event_handler_mai.h"
+#include "logmanager.h"
 
 AngStrong::AngStrong(QWidget *parent)
     : QMainWindow(parent),
 	main_widgets_ui_(new WidgetUI()),
 	titlebar_ui_(new TitleBar()),
 	eventhandler_grabimage_(new EventHandlerGrabImage())
+	,eventhandler_main_(new EventHandlerMain())
 {
     ui.setupUi(this);
 	InitializeUI();
 	BuildConnect();
+
+	sn_thread_ = new std::thread(&AngStrong::CheckSNThread, this);
+	sn_thread_->detach();
 }
 
 AngStrong::~AngStrong()
 {
-	if (main_widgets_ui_)
-	{
-		main_widgets_ui_->deleteLater();
-		main_widgets_ui_ = nullptr;
-	}
-	if (titlebar_ui_)
-	{
-		titlebar_ui_->deleteLater();
-		titlebar_ui_ = nullptr;
-	}
-	if (eventhandler_grabimage_)
-	{
-		delete eventhandler_grabimage_;
-		eventhandler_grabimage_ = nullptr;
-	}
+	is_quite_program_ = true;
+	ReleasePointer();
 }
 
 void AngStrong::InitializeUI()
@@ -51,6 +45,7 @@ void AngStrong::InitializeUI()
 	//}
 	setDockNestingEnabled(true);//打开Dock嵌套功能
 	imageview_.setParent(this);
+	imageview_.AddEventHandler(eventhandler_main_);
 	imageview_.SetGrabImageCallBack(eventhandler_grabimage_);
 	imageview_.SetTitle("ImageView00");
 	imageview_.show();
@@ -74,6 +69,13 @@ void AngStrong::SetQssSheetStyle(QString style)
 	this->setStyleSheet(style);
 	main_widgets_ui_->setStyleSheet(style);
 	titlebar_ui_->setStyleSheet(style);
+}
+
+void AngStrong::keyPressEvent(QKeyEvent * keyValue)
+{
+	sn_ += keyValue->text();
+	key_press_time_ = clock();
+	is_key_press_ = true;
 }
 
 void AngStrong::SetDefaultQssStyle()
@@ -104,4 +106,66 @@ void AngStrong::BuildConnect()
 {
 	qRegisterMetaType<cv::Mat>("cv::Mat");
 	connect(eventhandler_grabimage_, SIGNAL(send_image(cv::Mat,cv::Mat,cv::Mat)), &imageview_, SLOT(ReceiveImage(cv::Mat,cv::Mat,cv::Mat)));
+	connect(this, SIGNAL(SendSN(QString)), eventhandler_main_, SLOT(ReceiveSN(QString)));
+	connect(eventhandler_main_, SIGNAL(SendPSensorData(QString)), &dispview_, SLOT(ReadPSensorData(QString)));
+	connect(eventhandler_main_, SIGNAL(SendDeviceSNData(QString)), &dispview_, SLOT(ReceiveDeviceSNData(QString)));
+	connect(eventhandler_main_, SIGNAL(SendReadSN(QString)), &dispview_, SLOT(ReceiveSN(QString)));
+	connect(eventhandler_main_, SIGNAL(SendMouseInfo(int,int)), eventhandler_grabimage_, SLOT(ReceiveMouseInfo(int,int)));
+	connect(eventhandler_grabimage_, SIGNAL(SendLocationDepth(int,int,float)), &dispview_, SLOT(ReceiveLocationDepth(int,int,float)));
+}
+
+void AngStrong::ReleasePointer()
+{
+	if (main_widgets_ui_)
+	{
+		main_widgets_ui_->deleteLater();
+		main_widgets_ui_ = nullptr;
+	}
+	if (titlebar_ui_)
+	{
+		titlebar_ui_->deleteLater();
+		titlebar_ui_ = nullptr;
+	}
+	if (eventhandler_grabimage_)
+	{
+		delete eventhandler_grabimage_;
+		eventhandler_grabimage_ = nullptr;
+	}
+	if (sn_thread_)
+	{
+		delete sn_thread_;
+		sn_thread_ = nullptr;
+	}
+	if (eventhandler_main_)
+	{
+		delete eventhandler_main_;
+		eventhandler_main_ = nullptr;
+	}
+}
+
+void AngStrong::CheckSNThread()
+{
+	while (!is_quite_program_)
+	{
+		if (is_key_press_)
+		{
+			if (clock() - key_press_time_ > 100)
+			{
+				if (sn_.isEmpty())
+				{
+					Sleep(3);
+					continue;
+				}
+				emit SendSN(sn_);
+				LogManager::Write("sn=" + sn_.toStdString());
+				sn_.clear();
+				is_key_press_ = false;
+			}
+		}
+		else
+		{
+			Sleep(3);
+			continue;
+		}
+	}
 }

@@ -105,6 +105,7 @@ HRESULT __stdcall EventHandlerGrabImage::BufferCB(double Time, BYTE * pBuffer, l
 	GetDepthImage(pBuffer);
 	GetIRImage(pBuffer);
 	DispImage();
+	SendDepthImageData(depthDataRGB);
 	return S_OK;
 }
 
@@ -354,6 +355,29 @@ void EventHandlerGrabImage::DispImage()
 			return;
 		}
 	}
+}
+
+void EventHandlerGrabImage::SendDepthImageData(float * depth_image_data)
+{
+	if (m_MouseX >= 0 && m_MouseY >= 0)
+	{
+		int xhere = m_MouseX % frameHeightRGB;
+		int yhere = m_MouseY % frameWidthRGB;
+		if (m_MouseX >= frameHeightRGB)
+		{
+			emit SendLocationDepth(xhere, yhere, depth_image_data[yhere*frameHeightRGB + xhere]);
+		}
+		else
+		{
+			emit SendLocationDepth(-1, -1, 0);
+		}
+	}
+}
+
+void EventHandlerGrabImage::ReceiveMouseInfo(int x, int y)
+{
+	m_MouseX = x;
+	m_MouseY = y;
 }
 
 void EventHandlerGrabImage::ReceiveCameraFormat(int width, int height)

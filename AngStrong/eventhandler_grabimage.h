@@ -30,10 +30,13 @@ public:
 	void InitPDData(uchar *image_data);
 	bool IsInitPDData()const { return getParam; }
 	void DispImage();
+	void SendDepthImageData(float *depth_image_data);
 private slots:
 	void ReceiveCameraFormat(int width, int height);
+	void ReceiveMouseInfo(int x, int y);
 signals:
 	void send_image(cv::Mat image_rgb,cv::Mat image_depth,cv::Mat image_ir);
+	void SendLocationDepth(int x, int y, float depth);
 private:
 	int width_;
 	int height_;
@@ -78,6 +81,9 @@ private:
 	float* tmpdepth;
 	unsigned char* rgbData;
 
+	//当前鼠标位置
+	int m_MouseX;
+	int m_MouseY;
 	//AvgArea
 	bool calcArea = false;
 	bool getFirstArea = false;

@@ -65,64 +65,67 @@ bool CameraDS::Terminate()
 	bool bReturn = false;
 	do
 	{
-		if (IsRunning())
+		if (is_init_)
 		{
-			Stop();
-		}
-		if (grap_builder_)
-		{
-			grap_builder_->Release();
-			grap_builder_ = nullptr;
-		}
-		if (media_control_)
-		{
-			media_control_->Release();
-			media_control_ = nullptr;
-		}
-		if (media_event_)
-		{
-			media_event_->Release();
-			media_event_ = nullptr;
-		}
-		if (capture_grap_builder2_)
-		{
-			capture_grap_builder2_->Release();
-			capture_grap_builder2_ = nullptr;
-		}
-		if (sample_grabber_)
-		{
-			sample_grabber_->Release();
-			sample_grabber_ = nullptr;
-		}
-		if (source_filter_)
-		{
-			source_filter_->Release();
-			source_filter_ = nullptr;
-		}
-		if (sample_grabber_filter_)
-		{
-			sample_grabber_filter_->Release();
-			sample_grabber_filter_ = nullptr;
-		}
-		if (render_filter_)
-		{
-			render_filter_->Release();
-			render_filter_ = nullptr;
-		}
-		if (video_window_)
-		{
-			video_window_->Release();
-			video_window_ = nullptr;
-		}
-		if (camera_stream_format_config_)
-		{
-			camera_stream_format_config_->Release();
-			camera_stream_format_config_ = nullptr;
-		}
+			if (IsRunning())
+			{
+				Stop();
+			}
+			if (grap_builder_)
+			{
+				grap_builder_->Release();
+				grap_builder_ = nullptr;
+			}
+			if (media_control_)
+			{
+				media_control_->Release();
+				media_control_ = nullptr;
+			}
+			if (media_event_)
+			{
+				media_event_->Release();
+				media_event_ = nullptr;
+			}
+			if (capture_grap_builder2_)
+			{
+				capture_grap_builder2_->Release();
+				capture_grap_builder2_ = nullptr;
+			}
+			if (sample_grabber_)
+			{
+				sample_grabber_->Release();
+				sample_grabber_ = nullptr;
+			}
+			if (source_filter_)
+			{
+				source_filter_->Release();
+				source_filter_ = nullptr;
+			}
+			if (sample_grabber_filter_)
+			{
+				sample_grabber_filter_->Release();
+				sample_grabber_filter_ = nullptr;
+			}
+			if (render_filter_)
+			{
+				render_filter_->Release();
+				render_filter_ = nullptr;
+			}
+			if (video_window_)
+			{
+				video_window_->Release();
+				video_window_ = nullptr;
+			}
+			if (camera_stream_format_config_)
+			{
+				camera_stream_format_config_->Release();
+				camera_stream_format_config_ = nullptr;
+			}
 
-		CoUninitialize();
-		RemoveGraphFromRot(g_dwGraphRegister_);
-		is_init_ = false;
+			CoUninitialize();
+			RemoveGraphFromRot(g_dwGraphRegister_);
+			is_init_ = false;
+		}
 		bReturn = true;
 	} while (false);
 	return bReturn;

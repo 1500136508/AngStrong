@@ -22,6 +22,7 @@ public:
 	int get_current_camera_index();
 	int get_current_display_mode();
 	int get_current_grab_mode();
+	int get_current_port();
 private slots:
 	void on_open_camera_triggered();
 	void on_close_camera_triggered();
@@ -42,6 +43,7 @@ private:
 	void InitializeUI();
 	void InitializeCombo();
 	void BuildConnect();
+	void ReleasePointer();
 
     Ui::ImageViewQToolBar *ui;
 };

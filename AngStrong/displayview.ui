@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>724</width>
+    <width>382</width>
     <height>871</height>
    </rect>
   </property>
@@ -33,7 +33,7 @@
     <widget class="QLabel" name="m_lab_depth">
      <property name="font">
       <font>
-       <pointsize>20</pointsize>
+       <pointsize>30</pointsize>
        <weight>75</weight>
        <bold>true</bold>
       </font>
@@ -42,7 +42,7 @@
       <string notr="true">border-image: url(:/AngStrong/image_ico/backgroup/BG3.png);</string>
      </property>
      <property name="text">
-      <string/>
+      <string>--</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -53,7 +53,7 @@
     <widget class="QLabel" name="m_lab_device_sn">
      <property name="font">
       <font>
-       <pointsize>15</pointsize>
+       <pointsize>30</pointsize>
        <weight>75</weight>
        <bold>true</bold>
       </font>
@@ -62,7 +62,7 @@
       <string notr="true">border-image: url(:/AngStrong/image_ico/backgroup/BG3.png);</string>
      </property>
      <property name="text">
-      <string/>
+      <string>--</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -73,13 +73,13 @@
     <widget class="QLabel" name="m_lab_read_data_title">
      <property name="font">
       <font>
-       <pointsize>20</pointsize>
+       <pointsize>30</pointsize>
        <weight>75</weight>
        <bold>true</bold>
       </font>
      </property>
      <property name="text">
-      <string>P_Sensor</string>
+      <string>距离读数</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -90,13 +90,13 @@
     <widget class="QLabel" name="m_lab_device_sn_title">
      <property name="font">
       <font>
-       <pointsize>20</pointsize>
+       <pointsize>30</pointsize>
        <weight>75</weight>
        <bold>true</bold>
       </font>
      </property>
      <property name="text">
-      <string>Device_SN</string>
+      <string>写入的条码</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -107,13 +107,13 @@
     <widget class="QLabel" name="m_lab_depth_title">
      <property name="font">
       <font>
-       <pointsize>20</pointsize>
+       <pointsize>30</pointsize>
        <weight>75</weight>
        <bold>true</bold>
       </font>
      </property>
      <property name="text">
-      <string>Depth</string>
+      <string>深度值</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -124,7 +124,7 @@
     <widget class="QLabel" name="m_lab_read_data">
      <property name="font">
       <font>
-       <pointsize>20</pointsize>
+       <pointsize>30</pointsize>
        <weight>75</weight>
        <bold>true</bold>
       </font>
@@ -144,13 +144,13 @@
     <widget class="QLabel" name="m_lab_read_sn_title">
      <property name="font">
       <font>
-       <pointsize>20</pointsize>
+       <pointsize>30</pointsize>
        <weight>75</weight>
        <bold>true</bold>
       </font>
      </property>
      <property name="text">
-      <string>Read Device SN</string>
+      <string>读出的条码</string>
      </property>
      <property name="textFormat">
       <enum>Qt::AutoText</enum>
@@ -161,10 +161,10 @@
     </widget>
    </item>
    <item row="8" column="0" colspan="2">
-    <widget class="QLabel" name="m_lab_mouse_xy">
+    <widget class="QLabel" name="m_lab_read_sn">
      <property name="font">
       <font>
-       <pointsize>20</pointsize>
+       <pointsize>30</pointsize>
        <weight>75</weight>
        <bold>true</bold>
       </font>
@@ -173,7 +173,7 @@
       <string notr="true">border-image: url(:/AngStrong/image_ico/backgroup/BG3.png);</string>
      </property>
      <property name="text">
-      <string/>
+      <string>--</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>

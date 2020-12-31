@@ -5,11 +5,13 @@
 #include <list>
 #include <QMenu>
 #include <QFileDialog>
+#include <QMouseEvent>
 #include "definitionmenu.h"
 #include "imageview_qview.h"
 #include "CameraDS.h"
 #include "logmanager.h"
 #include "definition_camera.h"
+#include "eventhandler.h"
 
 ImageViewQView::ImageViewQView(QWidget *pParent /* = nullptr */)
 	:QGraphicsView(pParent)
@@ -41,6 +43,14 @@ ImageViewQView::~ImageViewQView()
 	ReleasePointer();
 }
 
+void ImageViewQView::AddEventHandler(EventHandler * event_handler)
+{
+	if (!event_handler_)
+	{
+		event_handler_ = event_handler;
+	}
+}
+
 bool ImageViewQView::OpenCamera(const int camera_id, const int widht, const int height, bool is_YUV2)
 {
 	bool bReturn = false;
@@ -57,9 +67,7 @@ bool ImageViewQView::OpenCamera(const int camera_id, const int widht, const int 
 			break;
 		camera_->SetCallBack(grabimage_callback_function_);
 
-		int w = camera_->GetCameraWidth();
-		int h = camera_->GetCameraHeight();
-		//camera_->Run();
+		camera_->Run();
 		bReturn = true;
 	} while (false);
 	return bReturn;
@@ -72,7 +80,7 @@ bool ImageViewQView::CloseCamera()
 	{
 		if (!camera_->Terminate())
 			break;
-		bReturn = false;
+		bReturn = true;
 	} while (false);
 	return bReturn;
 }
@@ -150,6 +158,13 @@ void ImageViewQView::DisplayImage(cv::Mat image_rgb, cv::Mat image_depth, cv::Ma
 
 void ImageViewQView::mouseMoveEvent(QMouseEvent * event)
 {
+	if (imageview_qpix_)
+	{
+		if (!imageview_qpix_->pixmap().isNull())
+		{
+			CalcInfo(event->localPos());
+		}
+	}
 	QGraphicsView::mouseMoveEvent(event);
 }
 
@@ -178,7 +193,7 @@ void ImageViewQView::resizeEvent(QResizeEvent *)
 	ZoomFit();
 	imageview_toolbar_->setParent(this);
 	QRect view_size = geometry();
-	imageview_toolbar_->resize(QSize(view_size.width(), 25));
+	imageview_toolbar_->resize(QSize(view_size.width(), 50));
 	imageview_toolbar_->move(0, 0);
 	imageview_toolbar_->show();
 }
@@ -192,7 +207,7 @@ void ImageViewQView::enterEvent(QEvent * event)
 {
 	imageview_toolbar_->setParent(this);
 	QRect view_size = geometry();
-	imageview_toolbar_->resize(QSize(view_size.width(), 25));
+	imageview_toolbar_->resize(QSize(view_size.width(), 50));
 	imageview_toolbar_->move(0, 0);
 	imageview_toolbar_->show();
 }
@@ -285,17 +300,35 @@ void ImageViewQView::on_measureCircle_clicked()
 
 void ImageViewQView::ReceiveLiveTriggered()
 {
-	camera_->Run();
+	if (camera_->Run())
+	{
+		if (event_handler_)
+		{
+			event_handler_->Run();
+		}
+	}
 }
 
 void ImageViewQView::ReceivePauseTriggered()
 {
-	camera_->Pause();
+	if (camera_->Pause())
+	{
+		if (event_handler_)
+		{
+			event_handler_->Pause();
+		}
+	}
 }
 
 void ImageViewQView::ReceiveStopTriggered()
 {
-	camera_->Stop();
+	if (camera_->Stop())
+	{
+		if (event_handler_)
+		{
+			event_handler_->Stop();
+		}
+	}
 }
 
 void ImageViewQView::ReceiveCaptureFilterTriggered()
@@ -428,6 +461,11 @@ void ImageViewQView::ReleasePointer()
 		delete camera_;
 		camera_ = nullptr;
 	}
+	/*if (event_handler_)
+	{
+		delete event_handler_;
+		event_handler_ = nullptr;
+	}*/
 }
 
 void ImageViewQView::RegisterDevice()
@@ -482,12 +520,25 @@ void ImageViewQView::ReceiveOpenCameraTriggered()
 		LogManager::Write("Failed to Live:No Camera!");
 		return;
 	}
-	OpenCamera(camera_index, 640, 480, true);
+	if (OpenCamera(camera_index, 640, 480, true))
+	{
+		if (event_handler_)
+		{
+			int current_port = imageview_toolbar_->get_current_port();
+			event_handler_->OpenCamera(current_port);
+		}
+	}
 }
 
 void ImageViewQView::ReceiveCloseCameraTriggered()
 {
-	CloseCamera();
+	if (CloseCamera())
+	{
+		if (event_handler_)
+		{
+			event_handler_->CloseCamera();
+		}
+	}
 }
 
 void ImageViewQView::UpdataCameraList()
@@ -506,6 +557,53 @@ void ImageViewQView::UpdataCameraList()
 		}
 	}
 	imageview_toolbar_->InitialzeCameraList(camera_name_list);
+}
+
+void ImageViewQView::CalcInfo(QPointF point)
+{
+	qreal view_x = point.x();
+	qreal view_y = point.y();
+
+	QPointF qPoint1 = imageview_qpix_->scenePos();//图像坐标
+	QPointF qPoint2 = mapToScene(view_x, view_y);//当前鼠标坐标
+	qreal imageW = imageview_qpix_->pixmap().width()*imageview_qpix_->GetScale();
+	qreal imageH = imageview_qpix_->pixmap().height()*imageview_qpix_->GetScale();
+	qreal ratio_x = m_ImageWidth / (imageW*1.0);
+	qreal ratio_y = m_ImageHeight / (imageH*1.0);
+	if (qPoint2.x() >= qPoint1.x() && qPoint2.x() <= qPoint1.x() + imageW &&
+		qPoint2.y() >= qPoint1.y() && qPoint2.y() <= qPoint1.y() + imageH)//判断鼠标是否在图像上
+	{
+
+		QPointF p1((qPoint2.x() - qPoint1.x()), (qPoint2.y() - qPoint1.y()));
+		qreal x = p1.x() * ratio_x;
+		qreal y = p1.y() * ratio_y;
+
+		if (qImage.valid(x, y))//判断坐标是否有效
+		{
+			QColor color = qImage.pixel(floor(x), floor(y));
+			int GrayValue_R = color.red();
+			int GrayValue_G = color.green();
+			int GrayValue_B = color.blue();
+			//emit SendImageGray(GrayValue_R, GrayValue_G, GrayValue_B);
+#ifdef DEBUG
+			qDebug() << "X:" << x << "Y:" << y << "R:" << GrayValue_R << " G:" << GrayValue_G << " B:" << GrayValue_B;
+#endif
+		}
+		if (event_handler_)
+		{
+			event_handler_->MouseMoveInfo(x, y);
+		}
+	}
+	else
+	{
+#ifdef DEBUG
+		qDebug() << "out of range";
+#endif
+		if (event_handler_)
+		{
+			event_handler_->MouseMoveInfo(-1, -1);
+		}
+	}
 }
 
 QImage ImageViewQView::cvMat2QImage(const cv::Mat & mat)

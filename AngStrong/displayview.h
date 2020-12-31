@@ -23,6 +23,7 @@ private slots:
 	void ReceiveXMData(QString read_data);
 	void ReadPSensorData(QString psensor_data);
 	void ReceiveDeviceSNData(QString);
+	void ReceiveSN(QString sn);
 	void UpdataUIMessage();
 private:
     Ui::DisplayView *ui;

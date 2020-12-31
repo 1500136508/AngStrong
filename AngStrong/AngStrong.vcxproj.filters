@@ -64,6 +64,24 @@
     <Filter Include="Source Files\Device\USBDevice">
       <UniqueIdentifier>{5dcd6295-0878-4176-aa24-81bfc36d7ad2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\EventHandler">
+      <UniqueIdentifier>{a70e75ac-951a-4466-847e-f680617815c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\EventHandler">
+      <UniqueIdentifier>{d1910f8f-be67-40ba-9b36-161432729544}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Thread">
+      <UniqueIdentifier>{78bca589-c30f-468f-8130-fa2c432f9958}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Thread">
+      <UniqueIdentifier>{cc71e9eb-b226-4b8f-b00b-af1609ec9211}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\XM">
+      <UniqueIdentifier>{fff34605-bb7b-4292-afe2-408744f13092}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\XM">
+      <UniqueIdentifier>{f937ad79-1cc6-4922-b11f-17188c50df49}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="angstrong.qrc">
@@ -122,11 +140,32 @@
     <ClCompile Include="logmanager.cpp">
       <Filter>Source Files\Model</Filter>
     </ClCompile>
-    <ClCompile Include="eventhandler_grabimage.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="displayview.cpp">
       <Filter>Source Files\View</Filter>
+    </ClCompile>
+    <ClCompile Include="eventhandler.cpp">
+      <Filter>Source Files\EventHandler</Filter>
+    </ClCompile>
+    <ClCompile Include="eventhandler_grabimage.cpp">
+      <Filter>Source Files\EventHandler</Filter>
+    </ClCompile>
+    <ClCompile Include="event_handler_mai.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HalerThread.cpp">
+      <Filter>Source Files\Thread</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xmodemV2\comm.c">
+      <Filter>Source Files\XM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xmodemV2\utilcom.c">
+      <Filter>Source Files\XM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xmodemV2\otp_interface.cpp">
+      <Filter>Source Files\XM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\xmodemV2\xmodem.c">
+      <Filter>Source Files\XM</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -180,11 +219,14 @@
     <QtMoc Include="imageview_qstatusbar.h">
       <Filter>Header Files\View\ImageView</Filter>
     </QtMoc>
-    <QtMoc Include="eventhandler_grabimage.h">
-      <Filter>Header Files</Filter>
-    </QtMoc>
     <QtMoc Include="displayview.h">
       <Filter>Header Files\View</Filter>
+    </QtMoc>
+    <QtMoc Include="eventhandler_grabimage.h">
+      <Filter>Header Files\EventHandler</Filter>
+    </QtMoc>
+    <QtMoc Include="event_handler_mai.h">
+      <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
   <ItemGroup>
@@ -205,6 +247,33 @@
     </ClInclude>
     <ClInclude Include="logmanager.h">
       <Filter>Header Files\Model</Filter>
+    </ClInclude>
+    <ClInclude Include="eventhandler.h">
+      <Filter>Header Files\EventHandler</Filter>
+    </ClInclude>
+    <ClInclude Include="definition_thread.h">
+      <Filter>Header Files\Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="HalerThread.h">
+      <Filter>Header Files\Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="HalerThreadDefinition.h">
+      <Filter>Header Files\Thread</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xmodemV2\comm.h">
+      <Filter>Header Files\XM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xmodemV2\data_type.h">
+      <Filter>Header Files\XM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xmodemV2\otp_interface.h">
+      <Filter>Header Files\XM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xmodemV2\utilcom.h">
+      <Filter>Header Files\XM</Filter>
+    </ClInclude>
+    <ClInclude Include="..\xmodemV2\xmodem.h">
+      <Filter>Header Files\XM</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
