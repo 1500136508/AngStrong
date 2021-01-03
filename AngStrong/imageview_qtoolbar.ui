@@ -98,7 +98,7 @@
   <action name="m_action_live">
    <property name="icon">
     <iconset resource="angstrong.qrc">
-     <normaloff>:/AngStrong/image_ico/button/Edit_Full.png</normaloff>:/AngStrong/image_ico/button/Edit_Full.png</iconset>
+     <normaloff>:/AngStrong/image_ico/button/Live_Camera.png</normaloff>:/AngStrong/image_ico/button/Live_Camera.png</iconset>
    </property>
    <property name="text">
     <string>Live</string>
@@ -110,7 +110,7 @@
   <action name="m_action_pause">
    <property name="icon">
     <iconset resource="angstrong.qrc">
-     <normaloff>:/AngStrong/image_ico/button/Edit_Full.png</normaloff>:/AngStrong/image_ico/button/Edit_Full.png</iconset>
+     <normaloff>:/AngStrong/image_ico/button/暂停.png</normaloff>:/AngStrong/image_ico/button/暂停.png</iconset>
    </property>
    <property name="text">
     <string>Pause</string>
@@ -122,7 +122,7 @@
   <action name="m_action_stop">
    <property name="icon">
     <iconset resource="angstrong.qrc">
-     <normaloff>:/AngStrong/image_ico/button/Edit_Full.png</normaloff>:/AngStrong/image_ico/button/Edit_Full.png</iconset>
+     <normaloff>:/AngStrong/image_ico/button/停止.png</normaloff>:/AngStrong/image_ico/button/停止.png</iconset>
    </property>
    <property name="text">
     <string>Stop</string>
@@ -134,7 +134,7 @@
   <action name="m_action_capture_filter">
    <property name="icon">
     <iconset resource="angstrong.qrc">
-     <normaloff>:/AngStrong/image_ico/button/Geom_FlipX.png</normaloff>:/AngStrong/image_ico/button/Geom_FlipX.png</iconset>
+     <normaloff>:/AngStrong/image_ico/button/3.png</normaloff>:/AngStrong/image_ico/button/3.png</iconset>
    </property>
    <property name="text">
     <string>Capture_Filter</string>
@@ -146,7 +146,7 @@
   <action name="m_action_capture_pin">
    <property name="icon">
     <iconset resource="angstrong.qrc">
-     <normaloff>:/AngStrong/image_ico/button/Geom_FlipY.png</normaloff>:/AngStrong/image_ico/button/Geom_FlipY.png</iconset>
+     <normaloff>:/AngStrong/image_ico/button/Edit_Option.png</normaloff>:/AngStrong/image_ico/button/Edit_Option.png</iconset>
    </property>
    <property name="text">
     <string>Capture_Pin</string>
@@ -158,7 +158,7 @@
   <action name="m_action_open_camera">
    <property name="icon">
     <iconset resource="angstrong.qrc">
-     <normaloff>:/AngStrong/image_ico/button/Open.png</normaloff>:/AngStrong/image_ico/button/Open.png</iconset>
+     <normaloff>:/AngStrong/image_ico/button/打开.png</normaloff>:/AngStrong/image_ico/button/打开.png</iconset>
    </property>
    <property name="text">
     <string>Open_Camera</string>
@@ -170,7 +170,7 @@
   <action name="m_action_close_camera">
    <property name="icon">
     <iconset resource="angstrong.qrc">
-     <normaloff>:/AngStrong/image_ico/button/Geom_Rotate.png</normaloff>:/AngStrong/image_ico/button/Geom_Rotate.png</iconset>
+     <normaloff>:/AngStrong/image_ico/button/关闭.png</normaloff>:/AngStrong/image_ico/button/关闭.png</iconset>
    </property>
    <property name="text">
     <string>Close_Camera</string>

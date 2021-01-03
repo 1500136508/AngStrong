@@ -67,6 +67,7 @@ EventHandlerGrabImage::EventHandlerGrabImage()
 
 EventHandlerGrabImage::~EventHandlerGrabImage()
 {
+	WaitGetImageFinished();
 }
 
 ULONG __stdcall EventHandlerGrabImage::AddRef()
@@ -101,11 +102,13 @@ HRESULT __stdcall EventHandlerGrabImage::BufferCB(double Time, BYTE * pBuffer, l
 	{
 		return S_FALSE;
 	}
+	is_get_image_finished = false;
 	GetRGBImage(pBuffer);
 	GetDepthImage(pBuffer);
 	GetIRImage(pBuffer);
 	DispImage();
 	SendDepthImageData(depthDataRGB);
+	is_get_image_finished = true;
 	return S_OK;
 }
 
@@ -384,4 +387,27 @@ void EventHandlerGrabImage::ReceiveCameraFormat(int width, int height)
 {
 	width_ = width;
 	height_ = height;
+}
+
+void EventHandlerGrabImage::WaitGetImageFinished(long timeout)
+{
+	clock_t wait_start_time = clock();
+	clock_t wait_time;
+	while (true)
+	{
+		wait_time = clock() - wait_start_time;
+		if (wait_time >= timeout)
+		{
+			break;
+		}
+		else if (is_get_image_finished)
+		{
+			break;
+		}
+		else
+		{
+			Sleep(3);
+			continue;
+		}
+	}
 }

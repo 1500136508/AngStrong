@@ -6,16 +6,21 @@
 EventHandlerMain::EventHandlerMain()
 {
 	BuildConnect();
-	CreateHalerThread();
+
+	std::thread read_psensor_thread(&EventHandlerMain::ReadPSensorThread, this);
+	std::thread write_device_sn_thread(&EventHandlerMain::WriteDeviceSNThread, this);
+	std::thread read_device_sn_thread(&EventHandlerMain::ReadDeviceSNThread, this);
+	read_psensor_thread.detach();
+	write_device_sn_thread.detach();
+	read_device_sn_thread.detach();
 }
 
 EventHandlerMain::~EventHandlerMain()
 {
 	quite_program = true;
+	is_run_ = false;
+	WaitThreadFinished();
 	CloseCamera();
-	CHalerThread::Terminate(EThreadSequence_pContext_ReadPSensor);
-	CHalerThread::Terminate(EThreadSequence_pContext_WriteSN);
-	CHalerThread::Terminate(EThreadSequence_pContext_ReadSN);
 }
 
 void EventHandlerMain::OpenCamera(int com_port)
@@ -32,33 +37,29 @@ void EventHandlerMain::OpenCamera(int com_port)
 			is_com_open_ = true;
 		}
 	}
+	is_run_ = true;
 }
 
 void EventHandlerMain::CloseCamera()
 {
+	is_run_ = false;
 	is_com_open_ = false;
 	cc.close_comm();
 }
 
 void EventHandlerMain::Run()
 {
-	CHalerThread::Resume(EThreadSequence_pContext_ReadPSensor);
-	CHalerThread::Resume(EThreadSequence_pContext_WriteSN);
-	CHalerThread::Resume(EThreadSequence_pContext_ReadSN);
+	is_run_ = true;
 }
 
 void EventHandlerMain::Pause()
 {
-	CHalerThread::Suspend(EThreadSequence_pContext_ReadPSensor);
-	CHalerThread::Suspend(EThreadSequence_pContext_WriteSN);
-	CHalerThread::Suspend(EThreadSequence_pContext_ReadSN);
+	is_run_ = false;
 }
 
 void EventHandlerMain::Stop()
 {
-	CHalerThread::Suspend(EThreadSequence_pContext_ReadPSensor);
-	CHalerThread::Suspend(EThreadSequence_pContext_WriteSN);
-	CHalerThread::Suspend(EThreadSequence_pContext_ReadSN);
+	is_run_ = false;
 }
 
 void EventHandlerMain::MouseMoveInfo(int x, int y)
@@ -80,122 +81,184 @@ void EventHandlerMain::BuildConnect()
 {
 }
 
-void EventHandlerMain::CreateHalerThread()
+void EventHandlerMain::ReadPSensorThread()
 {
-	CreateHalerThreadContext(pContext_ReadPSensor)
+	while (!quite_program)
 	{
-		while (!quite_program)
+		if (!is_run_)
 		{
-			if (!is_com_open_)
+			Sleep(3);
+			continue;
+		}
+		/*if (!is_com_open_)
+		{
+			Sleep(3);
+			continue;
+		}*/
+		static int gg = 1000;
+		is_read_psensor_finished = false;
+		//std::lock_guard<std::mutex> locker(mutex_);
+		std::string write_psensor_info("error:Failed to write psensor data!");
+		std::string read_psensor_info("error:Failed to read psensor data!");
+		std::string write_psensor_command = "ARG WRITE:DIST=1";
+		std::string read_psensor_command = "ARG READ:DIST";
+		/*cc.write_comm(write_psensor_command, write_psensor_info);
+		cc.write_comm(read_psensor_command, read_psensor_info);*/
+		test = gg;
+		write_psensor_info = "=1";
+		read_psensor_info = "="+std::to_string(test);
+		int find_error_position = read_psensor_info.find("error");
+		if (find_error_position != -1)
+		{
+			emit SendPSensorData("--");
+			continue;
+		}
+		auto find_position = read_psensor_info.find("=");
+		if (find_position >= 0)
+		{
+			auto iter_b = read_psensor_info.cbegin() + find_position + 1;
+			auto iter_e = read_psensor_info.cend();
+			std::string psensor(iter_b, iter_e);
+			try
 			{
-				Sleep(3);
-				continue;
+				emit SendPSensorData(QString::number(std::stoi(psensor)));
 			}
-			std::unique_lock<std::mutex> locker(mutex_);
-			locker.unlock();
-		
-			std::string write_psensor_info("error:Failed to write psensor data!");
-			std::string read_psensor_info("error:Failed to read psensor data!");
-			std::string write_psensor_command = "ARG WRITE:DIST=1";
-			std::string read_psensor_command = "ARG READ:DIST";
-			locker.lock();
-			cc.write_comm(write_psensor_command, write_psensor_info);
-			cc.write_comm(read_psensor_command, read_psensor_info);
-			locker.unlock();
-			int find_error_position = read_psensor_info.find("error");
-			if (find_error_position != -1)
+			catch (...)
 			{
-				emit SendPSensorData("--");
-				continue;
-			}
-			auto find_position = read_psensor_info.find("=");
-			if (find_position >= 0)
-			{
-				auto iter_b = read_psensor_info.cbegin() + find_position + 1;
-				auto iter_e = read_psensor_info.cend();
-				std::string psensor(iter_b, iter_e);
-				try
-				{
-					emit SendPSensorData(QString::number(std::stoi(psensor)));
-				}
-				catch (...)
-				{
-					std::string err_msg = "error";
-				}
+				std::string err_msg = "error";
 			}
 		}
-	};
-	CreateHalerThreadContext(pContext_WriteSN)
-	{
-		while (!quite_program)
+		if (gg >= 10000)
 		{
-			if (!is_com_open_)
-			{
-				Sleep(3);
-				continue;
-			}
-			if (!is_write_device_sn_)
-			{
-				Sleep(3);
-				continue;
-			}
-			std::unique_lock<std::mutex> locker(mutex_);
-			locker.unlock();
-			
-			std::string write_device_sn_info("Failed to write data!");
-			std::string write_device_sn_command = "ARG WRITE:SN=" + device_sn_;
-			locker.lock();
-			cc.write_comm(write_device_sn_command, write_device_sn_info);
-			locker.unlock();
-			int find_error_position = write_device_sn_info.find("error");
-			if (find_error_position != -1)
-			{
-				LogManager::Write("Failed to Write Device SN!");
-				emit SendDeviceSNData("–¥»Î ß∞‹£°");
-				continue;
-			}
-			locker.lock();
-			LogManager::Write("Success to " + write_device_sn_info);
-			emit SendDeviceSNData(QString::fromStdString(device_sn_));
-			is_write_device_sn_ = false;
-			locker.unlock();
+			gg = 1000;
 		}
-	};
-	CreateHalerThreadContext(pContext_ReadSN)
-	{
-		while (!quite_program)
+		else
 		{
-			if (!is_com_open_)
-			{
-				Sleep(3);
-				continue;
-			}
-			std::unique_lock<std::mutex> locker(mutex_);
-			locker.unlock();
+			++gg;
+		}
+		is_read_psensor_finished = true;
+		Sleep(1000);
+	}
+}
 
-			std::string read_device_sn_info("Failed to read data!");
-			std::string read_device_sn_command = "ARG READ:SN";
-			locker.lock();
-			cc.write_comm(read_device_sn_command, read_device_sn_info);
-			locker.unlock();
-			int find_error_position = read_device_sn_info.find("error");
-			if (find_error_position != -1)
-			{
-				LogManager::Write("Failed to Write Device SN!");
-				emit SendDeviceSNData("∂¡»° ß∞‹£°");
-				continue;
-			}
-			/*locker.lock();
-			int find_sn_position = read_device_sn_info.find("=");
-			auto iter_b = read_device_sn_info.cbegin() + find_sn_position + 1;
-			auto iter_e = read_device_sn_info.cend();
-			std::string read_sn(iter_b, iter_e);
-			emit SendReadSN(QString::fromStdString(read_sn));
-			is_write_device_sn_ = false;
-			locker.unlock();*/
+void EventHandlerMain::WriteDeviceSNThread()
+{
+	while (!quite_program)
+	{
+		if (!is_run_)
+		{
+			Sleep(3);
+			continue;
 		}
-	};
-	/*CHalerThread::Run(pContext_ReadPSensor, EThreadSequence_pContext_ReadPSensor, false);
-	CHalerThread::Run(pContext_WriteSN, EThreadSequence_pContext_WriteSN, false);
-	CHalerThread::Run(pContext_ReadSN, EThreadSequence_pContext_ReadSN, false);*/
+		/*if (!is_com_open_)
+		{
+			Sleep(3);
+			continue;
+		}*/
+		if (!is_write_device_sn_)
+		{
+			Sleep(3);
+			continue;
+		}
+		static int gg = 10;
+		is_write_device_sn_finished = false;
+		//std::lock_guard<std::mutex> locker(mutex_);
+		std::string write_device_sn_info("Failed to write data!");
+		std::string write_device_sn_command = "ARG WRITE:SN=" + device_sn_;
+		//cc.write_comm(write_device_sn_command, write_device_sn_info);
+		test = gg;
+		write_device_sn_info = device_sn_+"+"+std::to_string(test);
+		int find_error_position = write_device_sn_info.find("error");
+		if (find_error_position != -1)
+		{
+			LogManager::Write("Failed to Write Device SN!");
+			emit SendDeviceSNData("–¥»Î ß∞‹£°");
+			continue;
+		}
+		LogManager::Write("Success to " + write_device_sn_info);
+		emit SendDeviceSNData(QString::fromStdString(device_sn_));
+		is_write_device_sn_ = false;
+		if (gg >= 1000)
+		{
+			gg = 10;
+		}
+		else
+		{
+			++gg;
+		}
+		is_write_device_sn_finished = true;
+		Sleep(1000);
+	}
+}
+
+void EventHandlerMain::ReadDeviceSNThread()
+{
+	while (!quite_program)
+	{
+		if (!is_run_)
+		{
+			Sleep(3);
+			continue;
+		}
+		/*if (!is_com_open_)
+		{
+			Sleep(3);
+			continue;
+		}*/
+		static int gg = 10000;
+		is_read_device_sn_finished = false;
+		//std::lock_guard<std::mutex> locker(mutex_);
+		std::string read_device_sn_info("Failed to read data!");
+		std::string read_device_sn_command = "ARG READ:SN";
+		//cc.write_comm(read_device_sn_command, read_device_sn_info);
+		test = gg;
+		read_device_sn_info = "="+std::to_string(test);
+		int find_error_position = read_device_sn_info.find("error");
+		if (find_error_position != -1)
+		{
+			LogManager::Write("Failed to Write Device SN!");
+			emit SendDeviceSNData("∂¡»° ß∞‹£°");
+			continue;
+		}
+		int find_sn_position = read_device_sn_info.find("=");
+		auto iter_b = read_device_sn_info.cbegin() + find_sn_position + 1;
+		auto iter_e = read_device_sn_info.cend();
+		std::string read_sn(iter_b, iter_e);
+		emit SendReadSN(QString::fromStdString(read_sn));
+		is_write_device_sn_ = false;
+		if (gg >= 20000)
+		{
+			gg = 10000;
+		}
+		else
+		{
+			++gg;
+		}
+		is_read_device_sn_finished = true;
+		Sleep(1000);
+	}
+}
+
+void EventHandlerMain::WaitThreadFinished(long timeout)
+{
+	clock_t wait_start_time = clock();
+	clock_t wait_time;
+	while (true)
+	{
+		wait_time = clock() - wait_start_time;
+		if (wait_time >= timeout)
+		{
+			break;
+		}
+		else if(is_read_psensor_finished && is_write_device_sn_finished
+			&& is_read_device_sn_finished)
+		{
+			break;
+		}
+		else
+		{
+			Sleep(3);
+			continue;
+		}
+	}
 }

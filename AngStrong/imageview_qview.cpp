@@ -6,6 +6,7 @@
 #include <QMenu>
 #include <QFileDialog>
 #include <QMouseEvent>
+#include <QDebug>
 #include "definitionmenu.h"
 #include "imageview_qview.h"
 #include "CameraDS.h"
@@ -219,10 +220,12 @@ void ImageViewQView::leaveEvent(QEvent * event)
 
 bool ImageViewQView::nativeEvent(const QByteArray & eventType, void * message, long * result)
 {
+	qDebug() << "ImageViewQView nativeEvent";
 	MSG* msg = reinterpret_cast<MSG*>(message);
 	int msgType = msg->message;
 	if (msgType == WM_DEVICECHANGE)
 	{
+		qDebug() << "Updata CameraLIst";
 		imageview_toolbar_->FindAllPort();
 		UpdataCameraList();
 		PDEV_BROADCAST_HDR lpdb = (PDEV_BROADCAST_HDR)msg->lParam;

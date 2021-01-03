@@ -46,6 +46,8 @@ private:
 	float cx = 0;
 	float cy = 0;
 private:
+	void WaitGetImageFinished(long timeout = 5000);
+
 	std::vector<cv::Mat> container;
 
 	clock_t time1, time2, startTime, stopTime;
@@ -113,5 +115,6 @@ private:
 	bool program_quite = false;
 	bool getParam = false;
 	volatile bool is_running_ = false;
+	bool is_get_image_finished = true;
 };
 

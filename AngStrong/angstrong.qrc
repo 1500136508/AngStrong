@@ -1,6 +1,12 @@
 <RCC>
   <qresource prefix="/AngStrong">
+    <file>image_ico/button/Live_Camera.png</file>
     <file>image_ico/backgroup/bg1.png</file>
+    <file>image_ico/button/Live_Camera.png</file>
+    <file>image_ico/button/打开.png</file>
+    <file>image_ico/button/关闭.png</file>
+    <file>image_ico/button/停止.png</file>
+    <file>image_ico/button/暂停.png</file>
     <file>image_ico/backgroup/BG2.png</file>
     <file>image_ico/backgroup/BG3.png</file>
     <file>image_ico/backgroup/ConnectBG.png</file>

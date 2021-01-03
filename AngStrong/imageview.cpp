@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QSplitter>
+#include <QDebug>
 #include <qedit.h>
 
 ImageView::ImageView(QWidget *parent) :
@@ -24,6 +25,7 @@ ImageView::~ImageView()
 
 bool ImageView::nativeEvent(const QByteArray & eventType, void * message, long * result)
 {
+	qDebug() << "ImageView nativeEvent";
 	CreateBorderEvent(eventType, message, result);
 	return QWidget::nativeEvent(eventType, message, result);
 }
@@ -31,6 +33,7 @@ bool ImageView::nativeEvent(const QByteArray & eventType, void * message, long *
 void ImageView::InitializeUI()
 {
 	setWindowFlag(Qt::FramelessWindowHint);
+	ui->m_graphicsview->setParent(this);
 }
 
 void ImageView::SetQssSheetStyle(QString sheet_style)
