@@ -382,7 +382,7 @@ void CameraDS::ShowCmaeraCapturePinDialog()
 	HWND ghwndApp = 0;
 	//只有停止后，才能进行引脚属性的设置
 	media_control_->Stop();
-	RemoveConnections(source_filter_);
+	//RemoveConnections(source_filter_);
 
 	hr = capture_grap_builder2_->FindInterface(&PIN_CATEGORY_CAPTURE,
 		&MEDIATYPE_Interleaved, source_filter_,
@@ -406,7 +406,7 @@ void CameraDS::ShowCmaeraCapturePinDialog()
 		camera_stream_format_config_->Release();
 	}
 	RenderCamera(ECapture_Mode_Capture);
-	SetCallBack(callback_function_);
+	//SetCallBack(callback_function_);
 	Run();
 }
 
