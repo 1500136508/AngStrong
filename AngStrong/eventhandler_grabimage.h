@@ -47,6 +47,7 @@ private:
 	float cy = 0;
 private:
 	void WaitGetImageFinished(long timeout = 5000);
+	void ReleasePointer();
 
 	std::vector<cv::Mat> container;
 

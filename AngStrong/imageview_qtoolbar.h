@@ -31,6 +31,7 @@ private slots:
 	void on_stop_triggered();
 	void on_capture_filter_triggered();
 	void on_capture_pin_triggered();
+	void on_hide_toolbar_triggered();
 signals:
 	void send_open_camera_triggered();
 	void send_close_camera_triggered();
@@ -39,6 +40,7 @@ signals:
 	void send_stop_triggered();
 	void send_capture_filter_triggered();
 	void send_capture_pin_triggered();
+	void send_hide_toolbar_triggered();
 private:
 	void InitializeUI();
 	void InitializeCombo();

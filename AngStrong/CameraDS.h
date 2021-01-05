@@ -57,19 +57,21 @@ public:
 	bool GetCameraName(int nCamID, char* sName, int nBufferSize);
 private:
 	bool GetCameraDevice(const int device_id, IBaseFilter **device_filter);
+	void ReleasePointer();
 
-	IGraphBuilder *grap_builder_;//Graph builder object
-	IMediaControl *media_control_;
-	IMediaEventEx *media_event_;
-	ICaptureGraphBuilder2 *capture_grap_builder2_;// Capture graph builder
-	ISampleGrabber *sample_grabber_;// standard transform filter
+	IGraphBuilder *grap_builder_ = nullptr;//Graph builder object
+	IMediaControl *media_control_ = nullptr;
+	IMediaEventEx *media_event_ = nullptr;
+	ICaptureGraphBuilder2 *capture_grap_builder2_ = nullptr;// Capture graph builder
+	ISampleGrabber *sample_grabber_ = nullptr;// standard transform filter
 
-	IBaseFilter *source_filter_;
-	IBaseFilter *sample_grabber_filter_;
-	IBaseFilter *render_filter_;
+	IBaseFilter *source_filter_ = nullptr;
+	IBaseFilter *sample_grabber_filter_ = nullptr;
+	IBaseFilter *render_filter_ = nullptr;
+	IBaseFilter *video_mixing_render_filter_ = nullptr;  //视频渲染器
 
-	IVideoWindow *video_window_;
-	IAMStreamConfig *camera_stream_format_config_;    //流配置接口
+	IVideoWindow *video_window_ = nullptr;
+	IAMStreamConfig *camera_stream_format_config_ = nullptr;    //流配置接口
 	                                               
 	bool is_init_;
 	ECameraStatus camera_status_ = ECameraStatus_Unknow;

@@ -52,6 +52,7 @@
      <addaction name="separator"/>
      <addaction name="m_action_capture_filter"/>
      <addaction name="m_action_capture_pin"/>
+     <addaction name="m_action_hide_toobbar"/>
     </widget>
    </item>
    <item row="0" column="2">
@@ -177,6 +178,18 @@
    </property>
    <property name="toolTip">
     <string>关闭相机</string>
+   </property>
+  </action>
+  <action name="m_action_hide_toobbar">
+   <property name="icon">
+    <iconset resource="angstrong.qrc">
+     <normaloff>:/AngStrong/image_ico/button/Close.png</normaloff>:/AngStrong/image_ico/button/Close.png</iconset>
+   </property>
+   <property name="text">
+    <string>Hide_ToobBar</string>
+   </property>
+   <property name="toolTip">
+    <string>关闭菜单栏</string>
    </property>
   </action>
  </widget>

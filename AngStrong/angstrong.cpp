@@ -9,6 +9,7 @@
 #include "eventhandler_grabimage.h"
 #include "event_handler_mai.h"
 #include "logmanager.h"
+#include "ui_imageview.h"
 
 AngStrong::AngStrong(QWidget *parent)
     : QMainWindow(parent),
@@ -44,7 +45,7 @@ void AngStrong::InitializeUI()
 	//	delete p;//去除界面的中间窗口，实现任意区域停靠
 	//}
 	setDockNestingEnabled(true);//打开Dock嵌套功能
-	imageview_.setParent(this);
+	//imageview_.setParent(this);
 	imageview_.AddEventHandler(eventhandler_main_);
 	imageview_.SetGrabImageCallBack(eventhandler_grabimage_);
 	imageview_.SetTitle("ImageView00");
@@ -108,7 +109,7 @@ void AngStrong::BuildConnect()
 	connect(eventhandler_grabimage_, SIGNAL(send_image(cv::Mat,cv::Mat,cv::Mat)), &imageview_, SLOT(ReceiveImage(cv::Mat,cv::Mat,cv::Mat)));
 	connect(this, SIGNAL(SendSN(QString)), eventhandler_main_, SLOT(ReceiveSN(QString)));
 	connect(eventhandler_main_, SIGNAL(SendPSensorData(QString)), &dispview_, SLOT(ReadPSensorData(QString)));
-	connect(eventhandler_main_, SIGNAL(SendDeviceSNData(QString)), &dispview_, SLOT(ReceiveDeviceSNData(QString)));
+	connect(eventhandler_main_, SIGNAL(SendWriteSN(QString)), &dispview_, SLOT(ReceiveWriteSN(QString)));
 	connect(eventhandler_main_, SIGNAL(SendReadSN(QString)), &dispview_, SLOT(ReceiveSN(QString)));
 	connect(eventhandler_main_, SIGNAL(SendMouseInfo(int,int)), eventhandler_grabimage_, SLOT(ReceiveMouseInfo(int,int)));
 	connect(eventhandler_grabimage_, SIGNAL(SendLocationDepth(int,int,float)), &dispview_, SLOT(ReceiveLocationDepth(int,int,float)));

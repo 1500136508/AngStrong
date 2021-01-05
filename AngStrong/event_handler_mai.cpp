@@ -1,3 +1,4 @@
+#pragma execution_character_set("utf-8")
 #include "event_handler_mai.h"
 #include "HalerThread.h"
 #include "logmanager.h"
@@ -19,8 +20,8 @@ EventHandlerMain::~EventHandlerMain()
 {
 	quite_program = true;
 	is_run_ = false;
-	WaitThreadFinished();
 	CloseCamera();
+	WaitThreadFinished();
 }
 
 void EventHandlerMain::OpenCamera(int com_port)
@@ -35,6 +36,12 @@ void EventHandlerMain::OpenCamera(int com_port)
 		else
 		{
 			is_com_open_ = true;
+			std::string write_psensor_info("error:Failed to write psensor data!");
+			std::string write_psensor_command = "ARG WRITE:DIST=1";
+			cc.write_comm(write_psensor_command, write_psensor_info);
+			is_ready_to_read_device_sn_ = true;
+			is_ready_to_read_psensor_ = true;
+			read_psensor_.start(5000);
 		}
 	}
 	is_run_ = true;
@@ -44,7 +51,13 @@ void EventHandlerMain::CloseCamera()
 {
 	is_run_ = false;
 	is_com_open_ = false;
+	WaitThreadFinished();
 	cc.close_comm();
+	read_psensor_.stop();
+
+	emit SendPSensorData("--");
+	emit SendWriteSN("--");
+	emit SendReadSN("--");
 }
 
 void EventHandlerMain::Run()
@@ -79,6 +92,13 @@ void EventHandlerMain::ReceiveSN(QString sn)
 
 void EventHandlerMain::BuildConnect()
 {
+	bool ret = connect(&read_psensor_, SIGNAL(timeout()), this, SLOT(ReadPSensorTimer()));
+}
+
+void EventHandlerMain::ReadPSensorTimer()
+{
+	is_ready_to_read_psensor_ = true;
+	is_ready_to_read_device_sn_ = true;
 }
 
 void EventHandlerMain::ReadPSensorThread()
@@ -90,27 +110,29 @@ void EventHandlerMain::ReadPSensorThread()
 			Sleep(3);
 			continue;
 		}
-		/*if (!is_com_open_)
+		if (!is_com_open_)
 		{
 			Sleep(3);
 			continue;
-		}*/
-		static int gg = 1000;
+		}
+		if (!is_ready_to_read_psensor_)
+		{
+			Sleep(3);
+			continue;
+		}
 		is_read_psensor_finished = false;
-		//std::lock_guard<std::mutex> locker(mutex_);
-		std::string write_psensor_info("error:Failed to write psensor data!");
+		std::unique_lock<std::mutex> locker(mutex_);
+		
 		std::string read_psensor_info("error:Failed to read psensor data!");
-		std::string write_psensor_command = "ARG WRITE:DIST=1";
 		std::string read_psensor_command = "ARG READ:DIST";
-		/*cc.write_comm(write_psensor_command, write_psensor_info);
-		cc.write_comm(read_psensor_command, read_psensor_info);*/
-		test = gg;
-		write_psensor_info = "=1";
-		read_psensor_info = "="+std::to_string(test);
+		cc.write_comm(read_psensor_command, read_psensor_info);
+		locker.unlock();
 		int find_error_position = read_psensor_info.find("error");
 		if (find_error_position != -1)
 		{
 			emit SendPSensorData("--");
+			is_read_psensor_finished = true;
+			is_ready_to_read_psensor_ = false;
 			continue;
 		}
 		auto find_position = read_psensor_info.find("=");
@@ -126,18 +148,12 @@ void EventHandlerMain::ReadPSensorThread()
 			catch (...)
 			{
 				std::string err_msg = "error";
+				is_read_psensor_finished = true;
+				is_ready_to_read_psensor_ = false;
 			}
 		}
-		if (gg >= 10000)
-		{
-			gg = 1000;
-		}
-		else
-		{
-			++gg;
-		}
 		is_read_psensor_finished = true;
-		Sleep(1000);
+		is_ready_to_read_psensor_ = false;
 	}
 }
 
@@ -150,44 +166,36 @@ void EventHandlerMain::WriteDeviceSNThread()
 			Sleep(3);
 			continue;
 		}
-		/*if (!is_com_open_)
+		if (!is_com_open_)
 		{
 			Sleep(3);
 			continue;
-		}*/
+		}
 		if (!is_write_device_sn_)
 		{
 			Sleep(3);
 			continue;
 		}
-		static int gg = 10;
 		is_write_device_sn_finished = false;
-		//std::lock_guard<std::mutex> locker(mutex_);
+		is_ready_to_read_device_sn_ = false;
+		std::unique_lock<std::mutex> locker(mutex_);
 		std::string write_device_sn_info("Failed to write data!");
 		std::string write_device_sn_command = "ARG WRITE:SN=" + device_sn_;
-		//cc.write_comm(write_device_sn_command, write_device_sn_info);
-		test = gg;
-		write_device_sn_info = device_sn_+"+"+std::to_string(test);
+		cc.write_comm(write_device_sn_command, write_device_sn_info);
+		locker.unlock();
 		int find_error_position = write_device_sn_info.find("error");
 		if (find_error_position != -1)
 		{
 			LogManager::Write("Failed to Write Device SN!");
-			emit SendDeviceSNData("Ð´ÈëÊ§°Ü£¡");
+			emit SendWriteSN("Ð´ÈëÊ§°Ü£¡");
+			is_write_device_sn_finished = true;
 			continue;
 		}
 		LogManager::Write("Success to " + write_device_sn_info);
-		emit SendDeviceSNData(QString::fromStdString(device_sn_));
+		emit SendWriteSN(QString::fromStdString(device_sn_));
 		is_write_device_sn_ = false;
-		if (gg >= 1000)
-		{
-			gg = 10;
-		}
-		else
-		{
-			++gg;
-		}
 		is_write_device_sn_finished = true;
-		Sleep(1000);
+		is_ready_to_read_device_sn_ = true;
 	}
 }
 
@@ -200,42 +208,40 @@ void EventHandlerMain::ReadDeviceSNThread()
 			Sleep(3);
 			continue;
 		}
-		/*if (!is_com_open_)
+		if (!is_com_open_)
 		{
 			Sleep(3);
 			continue;
-		}*/
-		static int gg = 10000;
+		}
+		if (!is_ready_to_read_device_sn_)
+		{
+			Sleep(3);
+			continue;
+		}
 		is_read_device_sn_finished = false;
-		//std::lock_guard<std::mutex> locker(mutex_);
-		std::string read_device_sn_info("Failed to read data!");
+		std::unique_lock<std::mutex> locker(mutex_);
+		std::string read_device_sn_info("error:Failed to read data!");
 		std::string read_device_sn_command = "ARG READ:SN";
-		//cc.write_comm(read_device_sn_command, read_device_sn_info);
-		test = gg;
-		read_device_sn_info = "="+std::to_string(test);
+		cc.write_comm(read_device_sn_command, read_device_sn_info);
+		locker.unlock();
 		int find_error_position = read_device_sn_info.find("error");
 		if (find_error_position != -1)
 		{
 			LogManager::Write("Failed to Write Device SN!");
-			emit SendDeviceSNData("¶ÁÈ¡Ê§°Ü£¡");
+			emit SendReadSN("¶ÁÈ¡Ê§°Ü£¡");
+			is_write_device_sn_ = false;
+			is_read_device_sn_finished = true;
+			is_ready_to_read_device_sn_ = false;
 			continue;
 		}
 		int find_sn_position = read_device_sn_info.find("=");
 		auto iter_b = read_device_sn_info.cbegin() + find_sn_position + 1;
-		auto iter_e = read_device_sn_info.cend();
+		auto iter_e = read_device_sn_info.cend()-2;
 		std::string read_sn(iter_b, iter_e);
 		emit SendReadSN(QString::fromStdString(read_sn));
 		is_write_device_sn_ = false;
-		if (gg >= 20000)
-		{
-			gg = 10000;
-		}
-		else
-		{
-			++gg;
-		}
 		is_read_device_sn_finished = true;
-		Sleep(1000);
+		is_ready_to_read_device_sn_ = false;
 	}
 }
 

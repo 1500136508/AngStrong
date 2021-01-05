@@ -6,6 +6,7 @@
 #include "imageview_qpixmap.h"
 #include "graphicsrectitem.h"
 #include "imageview_qtoolbar.h"
+#include "definition_camera.h"
 
 class CameraDS;
 class ISampleGrabberCB;
@@ -55,6 +56,7 @@ public slots:
 	void on_measureCircle_clicked();
 
 	void SetImage(cv::Mat mat);//接收图像专用槽函数
+	void SetImage(cv::Mat image_rgb, cv::Mat image_depth, cv::Mat image_ir);//接收图像专用槽函数
 
 	void ReceiveOpenCameraTriggered();
 	void ReceiveCloseCameraTriggered();
@@ -63,6 +65,7 @@ public slots:
 	void ReceiveStopTriggered();
 	void ReceiveCaptureFilterTriggered();
 	void ReceiveCapturePinTriggered();
+	void ReceiveHideToolBarTriggered();
 private:
 	void InitializeUI();
 	void BuildConnect();
@@ -91,5 +94,6 @@ private:
 	std::vector<cv::Mat> container_;
 	cv::Mat combine_image_;
 	volatile bool first_time_to_live_ = true;
+	ECameraStatus current_camera_status_ = ECameraStatus_NoCamera;
 };
 

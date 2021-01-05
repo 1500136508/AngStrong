@@ -37,6 +37,7 @@ CameraDS::CameraDS()
 CameraDS::~CameraDS()
 {
 	Terminate();
+	ReleasePointer();
 }
 
 bool CameraDS::Initialize()
@@ -71,56 +72,7 @@ bool CameraDS::Terminate()
 			{
 				Stop();
 			}
-			if (grap_builder_)
-			{
-				grap_builder_->Release();
-				grap_builder_ = nullptr;
-			}
-			if (media_control_)
-			{
-				media_control_->Release();
-				media_control_ = nullptr;
-			}
-			if (media_event_)
-			{
-				media_event_->Release();
-				media_event_ = nullptr;
-			}
-			if (capture_grap_builder2_)
-			{
-				capture_grap_builder2_->Release();
-				capture_grap_builder2_ = nullptr;
-			}
-			if (sample_grabber_)
-			{
-				sample_grabber_->Release();
-				sample_grabber_ = nullptr;
-			}
-			if (source_filter_)
-			{
-				source_filter_->Release();
-				source_filter_ = nullptr;
-			}
-			if (sample_grabber_filter_)
-			{
-				sample_grabber_filter_->Release();
-				sample_grabber_filter_ = nullptr;
-			}
-			if (render_filter_)
-			{
-				render_filter_->Release();
-				render_filter_ = nullptr;
-			}
-			if (video_window_)
-			{
-				video_window_->Release();
-				video_window_ = nullptr;
-			}
-			if (camera_stream_format_config_)
-			{
-				camera_stream_format_config_->Release();
-				camera_stream_format_config_ = nullptr;
-			}
+			ReleasePointer();
 
 			CoUninitialize();
 			RemoveGraphFromRot(g_dwGraphRegister_);
@@ -142,6 +94,7 @@ bool CameraDS::Run()
 		{
 			HRESULT hr = S_FALSE;
 			hr = media_control_->Run();
+			video_window_->put_Visible(FALSE);
 			if (FAILED(hr))
 			{
 				// stop parts that started
@@ -184,16 +137,24 @@ bool CameraDS::Stop()
 	bool bReturn = false;
 	do
 	{
-		if (!is_init_)
-			break;
-		if (media_control_)
+		try
 		{
-			HRESULT hr = S_FALSE;
-			hr = media_control_->Stop();
-			if (FAILED(hr))
+			if (!is_init_)
 				break;
+			if (media_control_)
+			{
+				HRESULT hr = S_FALSE;
+				hr = media_control_->Stop();
+				video_window_->put_Visible(FALSE);
+				if (FAILED(hr))
+					break;
+			}
+			camera_status_ = ECameraStatus_Stop;
 		}
-		camera_status_ = ECameraStatus_Stop;
+		catch (...)
+		{
+			break;
+		}
 		bReturn = true;
 	} while (false);
 	return bReturn;
@@ -277,7 +238,7 @@ bool CameraDS::SetCameraFormat(int camera_id, const int width, const int height,
 		hr = iconfig->SetFormat(pmtConfig);
 		if (FAILED(hr))
 			break;
-		RenderCamera(ECapture_Mode_Capture);
+		RenderCamera(ECapture_Mode_Preview);
 
 		if (iconfig)
 			iconfig->Release();
@@ -382,7 +343,7 @@ void CameraDS::ShowCmaeraCapturePinDialog()
 	HWND ghwndApp = 0;
 	//只有停止后，才能进行引脚属性的设置
 	media_control_->Stop();
-	//RemoveConnections(source_filter_);
+	RemoveConnections(source_filter_);
 
 	hr = capture_grap_builder2_->FindInterface(&PIN_CATEGORY_CAPTURE,
 		&MEDIATYPE_Interleaved, source_filter_,
@@ -405,8 +366,7 @@ void CameraDS::ShowCmaeraCapturePinDialog()
 		pSpec->Release();
 		camera_stream_format_config_->Release();
 	}
-	RenderCamera(ECapture_Mode_Capture);
-	//SetCallBack(callback_function_);
+	RenderCamera(ECapture_Mode_Preview);
 	Run();
 }
 
@@ -561,7 +521,12 @@ bool CameraDS::CreateInterfaces()
 		hr = sample_grabber_filter_->QueryInterface(IID_ISampleGrabber, (void**)&sample_grabber_);
 		if (FAILED(hr))
 			break;
-
+		hr = grap_builder_->QueryInterface(IID_IVideoWindow, (void **)&video_window_);
+		if (FAILED(hr))
+			break;
+		hr = CoCreateInstance(CLSID_VideoMixingRenderer9, NULL, CLSCTX_INPROC_SERVER, IID_IBaseFilter, (void**)&video_mixing_render_filter_);
+		if (FAILED(hr))
+			break;
 		bReturn = true;
 	} while (false);
 	return bReturn;
@@ -582,6 +547,10 @@ bool CameraDS::AddCaptureVideoFilter()
 			break;
 
 		hr = grap_builder_->AddFilter(render_filter_, L"NullRenderer");
+		if (FAILED(hr))
+			break;
+
+		hr = grap_builder_->AddFilter(video_mixing_render_filter_, L"Preview");
 		if (FAILED(hr))
 			break;
 
@@ -611,6 +580,10 @@ bool CameraDS::RenderCamera(ECapture_Mode mode)
 		IPin *render_input = FindPin(render_filter_, PINDIR_INPUT);
 		if (!render_input)
 			break;
+		IPin *video_mixing_render_input = FindPin(video_mixing_render_filter_, PINDIR_INPUT);
+		if (!video_mixing_render_input)
+			break;
+
 		/*switch (mode)
 		{
 		case CameraDS::ECapture_Mode_Preview:
@@ -618,16 +591,19 @@ bool CameraDS::RenderCamera(ECapture_Mode mode)
 			capture_grap_builder2_->RenderStream(&PIN_CATEGORY_PREVIEW, &MEDIATYPE_Video,
 				camera_output_pin, NULL, NULL);
 		}
-			break;
+		break;
 		case CameraDS::ECapture_Mode_Capture:
 		{
 			capture_grap_builder2_->RenderStream(&PIN_CATEGORY_CAPTURE, &MEDIATYPE_Video,
 				camera_output_pin, NULL, NULL);
 		}
-			break;
+		break;
 		default:
 			break;
 		}*/
+
+		/*capture_grap_builder2_->RenderStream(&PIN_CATEGORY_PREVIEW, &MEDIATYPE_Video,
+			camera_output_pin, NULL, NULL);*/
 
 		grap_builder_->Connect(camera_output_pin, sample_grabber_input);
 		grap_builder_->Connect(sample_grabber_output, render_input);
@@ -700,6 +676,66 @@ bool CameraDS::GetCameraDevice(const int device_id, IBaseFilter ** device_filter
 		bReturn = true;
 	} while (false);
 	return bReturn;
+}
+
+void CameraDS::ReleasePointer()
+{
+	if (grap_builder_)
+	{
+		grap_builder_->Release();
+		grap_builder_ = nullptr;
+	}
+	if (media_event_)
+	{
+		media_event_->Release();
+		media_event_ = nullptr;
+	}
+	if (media_control_)
+	{
+		media_control_->Release();
+		media_control_ = nullptr;
+	}
+	if (capture_grap_builder2_)
+	{
+		capture_grap_builder2_->Release();
+		capture_grap_builder2_ = nullptr;
+	}
+	if (sample_grabber_)
+	{
+		sample_grabber_->Release();
+		sample_grabber_ = nullptr;
+	}
+	if (source_filter_)
+	{
+		source_filter_->Release();
+		source_filter_ = nullptr;
+	}
+	if (sample_grabber_filter_)
+	{
+		sample_grabber_filter_->Release();
+		sample_grabber_filter_ = nullptr;
+	}
+	if (render_filter_)
+	{
+		render_filter_->Release();
+		render_filter_ = nullptr;
+	}
+	if (video_window_)
+	{
+		video_window_->put_Visible(FALSE);
+		video_window_->Release();
+		video_window_ = nullptr;
+	}
+	if (camera_stream_format_config_)
+	{
+		camera_stream_format_config_->Release();
+		camera_stream_format_config_ = nullptr;
+	}
+	if (video_mixing_render_filter_)
+	{
+		video_mixing_render_filter_->Release();
+		video_mixing_render_filter_ = nullptr;
+	}
 }
 
 int CameraDS::CameraCount()

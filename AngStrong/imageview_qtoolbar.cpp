@@ -64,6 +64,7 @@ void ImageViewQToolBar::BuildConnect()
 	connect(ui->m_action_stop, SIGNAL(triggered()), this, SLOT(on_stop_triggered()));
 	connect(ui->m_action_capture_filter, SIGNAL(triggered()), this, SLOT(on_capture_filter_triggered()));
 	connect(ui->m_action_capture_pin, SIGNAL(triggered()), this, SLOT(on_capture_pin_triggered()));
+	connect(ui->m_action_hide_toobbar, SIGNAL(triggered()), this, SLOT(on_hide_toolbar_triggered()));
 }
 
 void ImageViewQToolBar::ReleasePointer()
@@ -171,4 +172,9 @@ void ImageViewQToolBar::on_capture_filter_triggered()
 void ImageViewQToolBar::on_capture_pin_triggered()
 {
 	emit send_capture_pin_triggered();
+}
+
+void ImageViewQToolBar::on_hide_toolbar_triggered()
+{
+	emit send_hide_toolbar_triggered();
 }

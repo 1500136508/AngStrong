@@ -2,6 +2,7 @@
 #include <QObject>
 #include <thread>
 #include <mutex>
+#include <QTimer>
 #include "eventhandler.h"
 #include "otp_interface.h"
 class EventHandlerMain :public QObject ,public EventHandler
@@ -20,9 +21,10 @@ public:
 private slots:
 	void ReceiveReadXMData(bool read_xm_data, int com_index);
 	void ReceiveSN(QString sn);
+	void ReadPSensorTimer();
 signals:
 	void SendPSensorData(QString psensor_data);
-	void SendDeviceSNData(QString message);
+	void SendWriteSN(QString message);
 	void SendReadSN(QString sn);
 	void SendMouseInfo(int x, int y);
 private:
@@ -46,6 +48,9 @@ private:
 	bool is_read_psensor_finished = true;
 	bool is_write_device_sn_finished = true;
 	bool is_read_device_sn_finished = true;
-	int test = 0;
+	bool is_ready_to_read_device_sn_ = false;
+	bool is_ready_to_read_psensor_ = false;
+
+	QTimer read_psensor_;
 };
 

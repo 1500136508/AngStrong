@@ -22,7 +22,7 @@ private slots:
 	void ReceiveAvgDepth(float avg0, float avg1);
 	void ReceiveXMData(QString read_data);
 	void ReadPSensorData(QString psensor_data);
-	void ReceiveDeviceSNData(QString);
+	void ReceiveWriteSN(QString);
 	void ReceiveSN(QString sn);
 	void UpdataUIMessage();
 private:

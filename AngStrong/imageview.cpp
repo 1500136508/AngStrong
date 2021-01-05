@@ -25,7 +25,6 @@ ImageView::~ImageView()
 
 bool ImageView::nativeEvent(const QByteArray & eventType, void * message, long * result)
 {
-	qDebug() << "ImageView nativeEvent";
 	CreateBorderEvent(eventType, message, result);
 	return QWidget::nativeEvent(eventType, message, result);
 }

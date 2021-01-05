@@ -11,7 +11,6 @@
 #include "imageview_qview.h"
 #include "CameraDS.h"
 #include "logmanager.h"
-#include "definition_camera.h"
 #include "eventhandler.h"
 
 ImageViewQView::ImageViewQView(QWidget *pParent /* = nullptr */)
@@ -68,7 +67,8 @@ bool ImageViewQView::OpenCamera(const int camera_id, const int widht, const int 
 			break;
 		camera_->SetCallBack(grabimage_callback_function_);
 
-		camera_->Run();
+		current_camera_status_ = ECameraStatus_Open;
+		ReceiveLiveTriggered();
 		bReturn = true;
 	} while (false);
 	return bReturn;
@@ -81,6 +81,7 @@ bool ImageViewQView::CloseCamera()
 	{
 		if (!camera_->Terminate())
 			break;
+		//current_camera_status_ = ECameraStatus_Close;
 		bReturn = true;
 	} while (false);
 	return bReturn;
@@ -166,6 +167,15 @@ void ImageViewQView::mouseMoveEvent(QMouseEvent * event)
 			CalcInfo(event->localPos());
 		}
 	}
+	QPoint point_show_toolbar = event->pos();
+	if (point_show_toolbar.y() <= 25)
+	{
+		imageview_toolbar_->setParent(this);
+		QRect view_size = geometry();
+		imageview_toolbar_->resize(QSize(view_size.width(), 50));
+		imageview_toolbar_->move(0, 0);
+		imageview_toolbar_->show();
+	}
 	QGraphicsView::mouseMoveEvent(event);
 }
 
@@ -196,7 +206,7 @@ void ImageViewQView::resizeEvent(QResizeEvent *)
 	QRect view_size = geometry();
 	imageview_toolbar_->resize(QSize(view_size.width(), 50));
 	imageview_toolbar_->move(0, 0);
-	imageview_toolbar_->show();
+	imageview_toolbar_->hide();
 }
 
 void ImageViewQView::contextMenuEvent(QContextMenuEvent * event)
@@ -206,11 +216,7 @@ void ImageViewQView::contextMenuEvent(QContextMenuEvent * event)
 
 void ImageViewQView::enterEvent(QEvent * event)
 {
-	imageview_toolbar_->setParent(this);
-	QRect view_size = geometry();
-	imageview_toolbar_->resize(QSize(view_size.width(), 50));
-	imageview_toolbar_->move(0, 0);
-	imageview_toolbar_->show();
+	
 }
 
 void ImageViewQView::leaveEvent(QEvent * event)
@@ -220,14 +226,10 @@ void ImageViewQView::leaveEvent(QEvent * event)
 
 bool ImageViewQView::nativeEvent(const QByteArray & eventType, void * message, long * result)
 {
-	qDebug() << "ImageViewQView nativeEvent";
 	MSG* msg = reinterpret_cast<MSG*>(message);
 	int msgType = msg->message;
 	if (msgType == WM_DEVICECHANGE)
 	{
-		qDebug() << "Updata CameraLIst";
-		imageview_toolbar_->FindAllPort();
-		UpdataCameraList();
 		PDEV_BROADCAST_HDR lpdb = (PDEV_BROADCAST_HDR)msg->lParam;
 		switch (msg->wParam)
 		{
@@ -236,9 +238,13 @@ bool ImageViewQView::nativeEvent(const QByteArray & eventType, void * message, l
 			if (lpdb->dbch_devicetype = DBT_DEVTYP_DEVICEINTERFACE)
 			{
 				Sleep(50);
-				/*LogManager::Write("检测到插入相机");
-				InitCamera();
-				m_ParamView.FindAllPort();*/
+				LogManager::Write("检测到插入相机");
+				imageview_toolbar_->FindAllPort();
+				UpdataCameraList();
+				if (current_camera_status_ == ECameraStatus_Live)
+				{
+					ReceiveOpenCameraTriggered();
+				}
 			}
 		}
 		break;
@@ -246,14 +252,11 @@ bool ImageViewQView::nativeEvent(const QByteArray & eventType, void * message, l
 		{
 			if (lpdb->dbch_devicetype = DBT_DEVTYP_DEVICEINTERFACE)
 			{
-				int a = 0;
-				//LogManager::Write("检测到拔出相机");
-				//if (!m_pMainImageView->m_pCamera->CameraIsStillHere())
-				//{
-				//	emit m_pMainImageView->SendCameraStatus(ECameraStatus_Close);
-				//}
-				//InitCamera();//检查camera
-				//m_ParamView.FindAllPort();
+				Sleep(50);
+				LogManager::Write("检测到拔出相机");
+				ReceiveCloseCameraTriggered();
+				imageview_toolbar_->FindAllPort();
+				UpdataCameraList();
 			}
 			break;
 		}
@@ -310,6 +313,7 @@ void ImageViewQView::ReceiveLiveTriggered()
 			event_handler_->Run();
 		}
 	}
+	current_camera_status_ = ECameraStatus_Live;
 }
 
 void ImageViewQView::ReceivePauseTriggered()
@@ -321,6 +325,7 @@ void ImageViewQView::ReceivePauseTriggered()
 			event_handler_->Pause();
 		}
 	}
+	current_camera_status_ = ECameraStatus_Pause;
 }
 
 void ImageViewQView::ReceiveStopTriggered()
@@ -332,6 +337,7 @@ void ImageViewQView::ReceiveStopTriggered()
 			event_handler_->Stop();
 		}
 	}
+	current_camera_status_ = ECameraStatus_Stop;
 }
 
 void ImageViewQView::ReceiveCaptureFilterTriggered()
@@ -342,6 +348,11 @@ void ImageViewQView::ReceiveCaptureFilterTriggered()
 void ImageViewQView::ReceiveCapturePinTriggered()
 {
 	camera_->ShowCmaeraCapturePinDialog();
+}
+
+void ImageViewQView::ReceiveHideToolBarTriggered()
+{
+	imageview_toolbar_->hide();
 }
 
 void ImageViewQView::InitializeUI()
@@ -366,6 +377,7 @@ void ImageViewQView::BuildConnect()
 	connect(imageview_toolbar_.get(), SIGNAL(send_stop_triggered()), this, SLOT(ReceiveStopTriggered()));
 	connect(imageview_toolbar_.get(), SIGNAL(send_capture_filter_triggered()), this, SLOT(ReceiveCaptureFilterTriggered()));
 	connect(imageview_toolbar_.get(), SIGNAL(send_capture_pin_triggered()), this, SLOT(ReceiveCapturePinTriggered()));
+	connect(imageview_toolbar_.get(), SIGNAL(send_hide_toolbar_triggered()), this, SLOT(ReceiveHideToolBarTriggered()));
 }
 
 void ImageViewQView::CreateCustomRightButtonMenu()
@@ -512,6 +524,72 @@ void ImageViewQView::SetImage(cv::Mat mat)
 			imageview_qpix_->setPixmap(QPixmap::fromImage(qImage));
 			imageview_qpix_->setScale(imageview_qpix_->GetScale());
 		}
+	}
+}
+
+void ImageViewQView::SetImage(cv::Mat image_rgb, cv::Mat image_depth, cv::Mat image_ir)
+{
+	try
+	{
+		int display_mode = imageview_toolbar_->get_current_display_mode();
+		switch (display_mode)
+		{
+		case EDisplayMode_IR_Depth_RGB:
+		{
+			image_ir.copyTo(container_[0]);
+			image_depth.copyTo(container_[1]);
+			image_rgb.copyTo(container_[2]);
+			cv::hconcat(container_, combine_image_);
+		}
+		break;
+		case EDisplayMode_IR:
+		{
+			combine_image_ = image_ir;
+		}
+		break;
+		case EDisplayMode_Depth:
+		{
+			combine_image_ = image_depth;
+		}
+		break;
+		case EDisplayMode_RGB:
+		{
+			combine_image_ = image_rgb;
+		}
+		break;
+		case EDisplayMode_IR_Depth_RGBAddDepth:
+		{
+			cv::Mat plus = image_rgb / 2 + image_depth / 2;
+			plus.copyTo(container_[2]);
+			cv::hconcat(container_, combine_image_);
+		}
+		break;
+		default:
+			break;
+		}
+
+		if (imageview_qpix_)
+		{
+			qImage = cvMat2QImage(combine_image_);
+			m_ImageWidth = qImage.width();
+			m_ImageHeight = qImage.height();
+			if (!qImage.isNull())
+			{
+				imageview_qpix_->setPixmap(QPixmap::fromImage(qImage));
+				imageview_qpix_->setScale(imageview_qpix_->GetScale());
+				if (first_time_to_live_)
+				{
+					ZoomFit();
+					first_time_to_live_ = false;
+				}
+			}
+		}
+	}
+	catch (cv::Exception &e)
+	{
+		std::string err_msg = e.what();
+		LogManager::Write(err_msg);
+		return;
 	}
 }
 

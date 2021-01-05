@@ -68,6 +68,7 @@ EventHandlerGrabImage::EventHandlerGrabImage()
 EventHandlerGrabImage::~EventHandlerGrabImage()
 {
 	WaitGetImageFinished();
+	ReleasePointer();
 }
 
 ULONG __stdcall EventHandlerGrabImage::AddRef()
@@ -97,6 +98,7 @@ HRESULT __stdcall EventHandlerGrabImage::BufferCB(double Time, BYTE * pBuffer, l
 		return S_FALSE;
 	}
 
+	clock_t start_time = clock();
 	InitPDData(pBuffer);
 	if (!IsNewImageData(pBuffer))
 	{
@@ -109,6 +111,11 @@ HRESULT __stdcall EventHandlerGrabImage::BufferCB(double Time, BYTE * pBuffer, l
 	DispImage();
 	SendDepthImageData(depthDataRGB);
 	is_get_image_finished = true;
+	clock_t test_time = clock() - start_time;
+	if (test_time < 34)
+	{
+		//Sleep(34 - test_time);
+	}
 	return S_OK;
 }
 
@@ -200,6 +207,50 @@ int EventHandlerGrabImage::setParam(float _fx, float _fy, float _cx, float _cy)
 	fy = _fy;
 	cx = _cx;
 	cy = _cy;
+	return 0;
+}
+
+int YUY2_to_RGB24(void* const data, const int width, const int height)
+{
+	if (data == NULL)
+		return -1;
+
+	//int width = width; // 640
+	//int height = height; // 400
+	unsigned char* const data_src = (unsigned char *)data;
+	unsigned char* const data_dst = (unsigned char *)data;
+
+	/*
+	 * transformat data stream from YUY2 to RGB24
+	 */
+	for (size_t y = 0; y < height; y++)
+	{
+		for (size_t x = 0; x < width; x++)
+		{
+			size_t index = (y * width + x) * 3;
+
+			int Y = *(data_src + index + 0);
+			int U = *(data_src + index + 1);
+			int V = *(data_src + index + 2);
+
+			int C = Y - 16;
+			int D = U - 128;
+			int E = V - 128;
+
+			int R = (298 * C + 409 * E + 128) >> 8;
+			int G = (298 * C - 100 * D - 208 * E + 128) >> 8;
+			int B = (298 * C + 516 * D + 128) >> 8;
+
+			/*int R = Y + 1.4075 * (V - 128);
+			int G = Y + 0.3455 * (U - 128) - 0.7169 * (V - 128);
+			int B = Y + 1.7790 * (U - 128);*/
+
+			*(data_dst + index + 0) = R > 255 ? 255 : (R < 0 ? 0 : R);
+			*(data_dst + index + 1) = G > 255 ? 255 : (G < 0 ? 0 : G);
+			*(data_dst + index + 2) = B > 255 ? 255 : (B < 0 ? 0 : B);
+		}
+	}
+
 	return 0;
 }
 
@@ -410,4 +461,52 @@ void EventHandlerGrabImage::WaitGetImageFinished(long timeout)
 			continue;
 		}
 	}
+}
+
+void EventHandlerGrabImage::ReleasePointer()
+{
+	program_quite = true;
+	if (irData)
+	{
+		delete[] irData;
+		irData = nullptr;
+	}
+	if (depthData)
+	{
+		delete[] depthData;
+		depthData = nullptr;
+	}
+	if (predepthData)
+	{
+		delete[] predepthData;
+		predepthData = nullptr;
+	}
+	if (depthDataRGB)
+	{
+		delete[] depthDataRGB;
+		depthDataRGB = nullptr;
+	}
+	if (tmpdepth)
+	{
+		delete[] tmpdepth;
+		tmpdepth = nullptr;
+	}
+	if (_buf)
+	{
+		delete[] _buf;
+		_buf = nullptr;
+	}
+	if (_buf2)
+	{
+		delete[] _buf2;
+		_buf2 = nullptr;
+	}
+	RGBFrame.release();
+	depthFrame.release();
+	irFrame.release();
+	for (size_t sz = 0; sz < 3;++sz)
+	{
+		container[sz].release();
+	}
+	container.clear();
 }

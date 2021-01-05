@@ -1,3 +1,4 @@
+#pragma execution_character_set("utf-8")
 #include "displayview.h"
 #include "ui_displayview.h"
 #include <windows.h>
@@ -10,7 +11,6 @@ DisplayView::DisplayView(QWidget *parent) :
 {
     ui->setupUi(this);
 	BuildConnect();
-	updata_ui_message_.start(5000);
 }
 
 DisplayView::~DisplayView()
@@ -20,7 +20,7 @@ DisplayView::~DisplayView()
 
 void DisplayView::BuildConnect()
 {
-	connect(&updata_ui_message_, SIGNAL(timeout()), this, SLOT(UpdataUIMessage()));
+	bool ret = connect(&updata_ui_message_, SIGNAL(timeout()), this, SLOT(UpdataUIMessage()));
 }
 
 void DisplayView::ReceiveImageGray(int r, int g, int b)
@@ -45,9 +45,10 @@ void DisplayView::ReadPSensorData(QString psensor_data)
 	ui->m_lab_read_data->setText(psensor_data);
 }
 
-void DisplayView::ReceiveDeviceSNData(QString message)
+void DisplayView::ReceiveWriteSN(QString message)
 {
 	ui->m_lab_device_sn->setText(message);
+	updata_ui_message_.start(5000);
 }
 
 void DisplayView::ReceiveSN(QString sn)
@@ -58,6 +59,7 @@ void DisplayView::ReceiveSN(QString sn)
 void DisplayView::UpdataUIMessage()
 {
 	ui->m_lab_device_sn->setText("--");
+	updata_ui_message_.stop();
 }
 
 void DisplayView::ReceiveLocationDepth(int x, int y, float depth)
