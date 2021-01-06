@@ -65,6 +65,7 @@ bool ImageViewQView::OpenCamera(const int camera_id, const int widht, const int 
 			break;
 		if (!camera_->SetCameraFormat(camera_id, widht, height, is_YUV2))
 			break;
+		camera_->SetCallBack(nullptr);
 		camera_->SetCallBack(grabimage_callback_function_);
 
 		current_camera_status_ = ECameraStatus_Open;
