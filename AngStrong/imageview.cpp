@@ -46,15 +46,6 @@ void ImageView::SetTitle(QString title)
 	ui->m_lab_title->setText(title);
 }
 
-void ImageView::SetGrabImageCallBack(ISampleGrabberCB * callback)
-{
-	if (!grabimage_callback_)
-	{
-		grabimage_callback_ = callback;
-	}
-	ui->m_graphicsview->SetGrabImageCallBack(grabimage_callback_);
-}
-
 void ImageView::AddEventHandler(EventHandler * event_handler)
 {
 	ui->m_graphicsview->AddEventHandler(event_handler);

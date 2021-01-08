@@ -24,6 +24,7 @@ public:
 	int get_current_grab_mode();
 	int get_current_port();
 private slots:
+	void on_display_mode_changed(int);
 	void on_open_camera_triggered();
 	void on_close_camera_triggered();
 	void on_live_triggered();
@@ -33,6 +34,7 @@ private slots:
 	void on_capture_pin_triggered();
 	void on_hide_toolbar_triggered();
 signals:
+	void send_display_mode_changed(int current_mode);
 	void send_open_camera_triggered();
 	void send_close_camera_triggered();
 	void send_live_triggered();

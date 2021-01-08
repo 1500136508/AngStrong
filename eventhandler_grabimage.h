@@ -1,23 +1,26 @@
 #pragma once
 #include <QObject>
-#include <qedit.h>
 #include <opencv.hpp>
+#include "eventhandler.h"
 
 #define EFE_FORMAT
 
-class EventHandlerGrabImage:public QObject,public ISampleGrabberCB
+class EventHandlerGrabImage:public QObject,public EventHandler
 {
 	Q_OBJECT
 public:
 	EventHandlerGrabImage();
 	~EventHandlerGrabImage();
 
-	ULONG STDMETHODCALLTYPE AddRef();
-	ULONG STDMETHODCALLTYPE Release();
-	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObject);
+	virtual void OpenCamera(int com_port)override;
+	virtual void CloseCamera()override;
+	virtual void Run()override;
+	virtual void Pause()override;
+	virtual void Stop()override;
+	virtual void OnDisplayModeChange(int current_mode) = 0;
+	virtual void MouseMoveInfo(int x, int y) = 0;
 
-	HRESULT STDMETHODCALLTYPE SampleCB(double Time, IMediaSample *pSample);
-	HRESULT STDMETHODCALLTYPE BufferCB(double Time, BYTE *pBuffer, long BufferLen);
+	virtual void GetImageBuffer(double Time, BYTE * pBuffer, long BufferLen) = 0;
 	
 	void readpdData();
 	// 设置内外参

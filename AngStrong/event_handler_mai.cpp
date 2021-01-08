@@ -1,5 +1,6 @@
 #pragma execution_character_set("utf-8")
 #include "event_handler_mai.h"
+#include "imageview_qview.h"
 #include "HalerThread.h"
 #include "logmanager.h"
 #include "definition_thread.h"
@@ -8,12 +9,12 @@ EventHandlerMain::EventHandlerMain()
 {
 	BuildConnect();
 
-	std::thread read_psensor_thread(&EventHandlerMain::ReadPSensorThread, this);
+	/*std::thread read_psensor_thread(&EventHandlerMain::ReadPSensorThread, this);
 	std::thread write_device_sn_thread(&EventHandlerMain::WriteDeviceSNThread, this);
 	std::thread read_device_sn_thread(&EventHandlerMain::ReadDeviceSNThread, this);
 	read_psensor_thread.detach();
 	write_device_sn_thread.detach();
-	read_device_sn_thread.detach();
+	read_device_sn_thread.detach();*/
 }
 
 EventHandlerMain::~EventHandlerMain()
@@ -75,9 +76,55 @@ void EventHandlerMain::Stop()
 	is_run_ = false;
 }
 
+void EventHandlerMain::OnDisplayModeChange(int current_mode)
+{
+	int a = 0;
+}
+
 void EventHandlerMain::MouseMoveInfo(int x, int y)
 {
 	emit SendMouseInfo(x, y);
+}
+
+void EventHandlerMain::GetImageBuffer(double Time, BYTE * pBuffer, long BufferLen,ImageViewQView *view)
+{
+	if (!pBuffer)
+	{
+		return;
+	}
+	static int num = 0;
+	++num;
+	if (num == 3)
+	{
+		std::string write_info("");
+		cc.write_comm("ARG WRITE:S=4", write_info);
+		cc.close_comm();
+	}
+	else if (num < 3)
+	{
+		Sleep(100);
+		return;
+	}
+	//WriteImageBinFile(pBuffer, BufferLen);
+	//InitPDData(pBuffer);
+	//if (!IsNewImageData(pBuffer))
+	//{
+	//	return;
+	//}
+	//GetRGBImage(pBuffer);
+	//GetDepthImage(pBuffer);
+	//GetIRImage(pBuffer);
+	//DispImage();
+	////发送深度信息
+	//SendDepthImageData(depthDataRGB);
+	////发送平均深度信息
+	//CalcAvgDepthData(depthDataRGB);
+	////保存图像
+	//if (m_bIsSaveImage)
+	//{
+	//	emit sendSaveImageData(irFrameAlign, RGBFrame, depthDataRGB);
+	//}
+	return;
 }
 
 void EventHandlerMain::ReceiveReadXMData(bool read_xm_data, int com_index)

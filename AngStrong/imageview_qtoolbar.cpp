@@ -57,6 +57,7 @@ void ImageViewQToolBar::InitializeCombo()
 
 void ImageViewQToolBar::BuildConnect()
 {
+	connect(ui->m_combo_display_mode, SIGNAL(currentIndexChanged(int)), this, SLOT(on_display_mode_changed(int)));
 	connect(ui->m_action_open_camera, SIGNAL(triggered()), this, SLOT(on_open_camera_triggered()));
 	connect(ui->m_action_close_camera, SIGNAL(triggered()), this, SLOT(on_close_camera_triggered()));
 	connect(ui->m_action_live, SIGNAL(triggered()), this, SLOT(on_live_triggered()));
@@ -137,6 +138,11 @@ int ImageViewQToolBar::get_current_port()
 	std::string port_no(iter_b, iter_e);
 	int port = std::stoi(port_no);
 	return port;
+}
+
+void ImageViewQToolBar::on_display_mode_changed(int mode)
+{
+	emit send_display_mode_changed(mode);
 }
 
 void ImageViewQToolBar::on_open_camera_triggered()

@@ -17,7 +17,10 @@ public:
 	void Run()override;
 	void Pause()override;
 	void Stop()override;
-	void MouseMoveInfo(int x, int y);
+	void OnDisplayModeChange(int current_mode)override;
+	void MouseMoveInfo(int x, int y)override;
+
+	void GetImageBuffer(double Time, BYTE * pBuffer, long BufferLen,ImageViewQView *view)override;
 private slots:
 	void ReceiveReadXMData(bool read_xm_data, int com_index);
 	void ReceiveSN(QString sn);

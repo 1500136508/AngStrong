@@ -199,7 +199,17 @@ bool CameraDS::SetCameraFormat(int camera_id, const int width, const int height,
 		Stop();
 		RemoveConnections(source_filter_);
 		HRESULT hr = S_FALSE;
-		IAMStreamConfig *iconfig = nullptr;
+
+		AM_MEDIA_TYPE   mt;
+		ZeroMemory(&mt, sizeof(AM_MEDIA_TYPE));
+		mt.majortype = MEDIATYPE_Video;
+		if (true) mt.subtype = MEDIASUBTYPE_YUY2;
+		else mt.subtype = MEDIASUBTYPE_MJPG;
+		mt.formattype = FORMAT_VideoInfo;
+		hr = sample_grabber_->SetMediaType(&mt);
+		MYFREEMEDIATYPE(mt);
+
+		/*IAMStreamConfig *iconfig = nullptr;
 		IPin *camera_output_pin = FindPin(source_filter_, PINDIR_OUTPUT);
 		if (!camera_output_pin)
 			break;
@@ -207,15 +217,6 @@ bool CameraDS::SetCameraFormat(int camera_id, const int width, const int height,
 		hr = camera_output_pin->QueryInterface(IID_IAMStreamConfig, (void**)&iconfig);
 		if (FAILED(hr))
 			break;
-
-		AM_MEDIA_TYPE   mt;
-		ZeroMemory(&mt, sizeof(AM_MEDIA_TYPE));
-		mt.majortype = MEDIATYPE_Video;
-		if (is_YUV2) mt.subtype = MEDIASUBTYPE_YUY2;
-		else mt.subtype = MEDIASUBTYPE_MJPG;
-		mt.formattype = FORMAT_VideoInfo;
-		hr = sample_grabber_->SetMediaType(&mt);
-		MYFREEMEDIATYPE(mt);
 
 		VIDEO_STREAM_CONFIG_CAPS scc;
 		AM_MEDIA_TYPE *pmtConfig = nullptr;
@@ -238,13 +239,79 @@ bool CameraDS::SetCameraFormat(int camera_id, const int width, const int height,
 		hr = iconfig->SetFormat(pmtConfig);
 		if (FAILED(hr))
 			break;
-		RenderCamera(ECapture_Mode_Preview);
 
 		if (iconfig)
 			iconfig->Release();
 		if (camera_output_pin)
 			camera_output_pin->Release();
-		MYFREEMEDIATYPE(*pmtConfig);
+		MYFREEMEDIATYPE(*pmtConfig);*/
+
+		{
+			//////////////////////////////////////////////////////////////////////////////
+			// 加入由 lWidth和lHeight设置的摄像头的宽和高 的功能，默认320*240
+			// by flymanbox @2009-01-24
+			//////////////////////////////////////////////////////////////////////////////
+			IAMStreamConfig *iconfig = NULL;
+			IPin *camera_output_pin = FindPin(source_filter_, PINDIR_OUTPUT);
+			if (!camera_output_pin)
+				break;
+			hr = camera_output_pin->QueryInterface(IID_IAMStreamConfig, (void**)&iconfig);
+
+			AM_MEDIA_TYPE *pmtConfig;
+
+			int iCount = 0, iSize = 0;
+			hr = iconfig->GetNumberOfCapabilities(&iCount, &iSize);
+
+			if (iSize == sizeof(VIDEO_STREAM_CONFIG_CAPS)) {
+				for (int iFormat = 0; iFormat < iCount; iFormat++)
+				{
+					VIDEO_STREAM_CONFIG_CAPS scc;
+					hr = iconfig->GetStreamCaps(iFormat, &pmtConfig, (BYTE *)&scc);
+
+					if (SUCCEEDED(hr)) {
+						if (is_YUV2 && pmtConfig->majortype == MEDIATYPE_Video && pmtConfig->formattype == FORMAT_VideoInfo
+							&& pmtConfig->subtype == MEDIASUBTYPE_YUY2)
+						{
+							VIDEOINFOHEADER *phead = (VIDEOINFOHEADER*)(pmtConfig->pbFormat);
+							phead->bmiHeader.biWidth = width;
+							phead->bmiHeader.biHeight = height;
+							phead->bmiHeader.biCompression = MAKEFOURCC('Y', 'U', 'Y', '2');
+
+							if ((hr = iconfig->SetFormat(pmtConfig)) != S_OK)
+							{
+								return false;
+							}
+							if (FAILED(hr))
+							{
+								MessageBox(NULL, TEXT("SetFormat Failed\n"), NULL, MB_OK);
+							}
+							break;
+						}
+						else if (!is_YUV2 && pmtConfig->majortype == MEDIATYPE_Video && pmtConfig->formattype == FORMAT_VideoInfo
+							&& pmtConfig->subtype == MEDIASUBTYPE_MJPG) {
+							VIDEOINFOHEADER *phead = (VIDEOINFOHEADER*)(pmtConfig->pbFormat);
+							phead->bmiHeader.biWidth = width;
+							phead->bmiHeader.biHeight = height;
+							//phead->bmiHeader.biCompression = MAKEFOURCC('M', 'J', 'P', 'G');
+
+							if ((hr = iconfig->SetFormat(pmtConfig)) != S_OK)
+							{
+								return false;
+							}
+							if (FAILED(hr))
+							{
+								MessageBox(NULL, TEXT("SetFormat Failed\n"), NULL, MB_OK);
+							}
+							break;
+						}
+					}
+
+				}
+			}
+			iconfig->Release();
+			iconfig = NULL;
+			MYFREEMEDIATYPE(*pmtConfig);
+		}
 
 		bReturn = true;
 	} while (false);
@@ -527,6 +594,7 @@ bool CameraDS::CreateInterfaces()
 		hr = CoCreateInstance(CLSID_VideoMixingRenderer9, NULL, CLSCTX_INPROC_SERVER, IID_IBaseFilter, (void**)&video_mixing_render_filter_);
 		if (FAILED(hr))
 			break;
+
 		bReturn = true;
 	} while (false);
 	return bReturn;
@@ -550,9 +618,9 @@ bool CameraDS::AddCaptureVideoFilter()
 		if (FAILED(hr))
 			break;
 
-		hr = grap_builder_->AddFilter(video_mixing_render_filter_, L"Preview");
+		/*hr = grap_builder_->AddFilter(video_mixing_render_filter_, L"Preview");
 		if (FAILED(hr))
-			break;
+			break;*/
 
 		AddGraphToRot(grap_builder_, &g_dwGraphRegister_);
 		bReturn = true;
@@ -605,8 +673,12 @@ bool CameraDS::RenderCamera(ECapture_Mode mode)
 		/*capture_grap_builder2_->RenderStream(&PIN_CATEGORY_PREVIEW, &MEDIATYPE_Video,
 			camera_output_pin, NULL, NULL);*/
 
-		grap_builder_->Connect(camera_output_pin, sample_grabber_input);
-		grap_builder_->Connect(sample_grabber_output, render_input);
+		HRESULT hr = grap_builder_->Connect(camera_output_pin, sample_grabber_input);
+		if (FAILED(hr))
+			break;
+		hr = grap_builder_->Connect(sample_grabber_output, render_input);
+		if (FAILED(hr))
+			break;
 		bReturn = true;
 	} while (false);
 	return bReturn;
@@ -672,7 +744,6 @@ bool CameraDS::GetCameraDevice(const int device_id, IBaseFilter ** device_filter
 			moniker->Release();
 			index++;
 		}
-
 		bReturn = true;
 	} while (false);
 	return bReturn;

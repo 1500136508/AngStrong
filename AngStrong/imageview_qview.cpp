@@ -43,6 +43,35 @@ ImageViewQView::~ImageViewQView()
 	ReleasePointer();
 }
 
+ULONG __stdcall ImageViewQView::AddRef()
+{
+	return 0;
+}
+
+ULONG __stdcall ImageViewQView::Release()
+{
+	return 0;
+}
+
+HRESULT __stdcall ImageViewQView::QueryInterface(REFIID riid, void ** ppvObject)
+{
+	return S_OK;
+}
+
+HRESULT __stdcall ImageViewQView::SampleCB(double Time, IMediaSample * pSample)
+{
+	return S_OK;
+}
+
+HRESULT __stdcall ImageViewQView::BufferCB(double Time, BYTE * pBuffer, long BufferLen)
+{
+	if (event_handler_)
+	{
+		event_handler_->GetImageBuffer(Time, pBuffer, BufferLen);
+	}
+	return S_OK;
+}
+
 void ImageViewQView::AddEventHandler(EventHandler * event_handler)
 {
 	if (!event_handler_)
@@ -58,16 +87,16 @@ bool ImageViewQView::OpenCamera(const int camera_id, const int widht, const int 
 	{
 		if (!camera_->Initialize())
 			break;
-
 		if (!camera_->SetCameraDevice(camera_id))
 			break;
 		if (!camera_->AddCaptureVideoFilter())
 			break;
 		if (!camera_->SetCameraFormat(camera_id, widht, height, is_YUV2))
 			break;
-		camera_->SetCallBack(nullptr);
-		camera_->SetCallBack(grabimage_callback_function_);
+		if (!camera_->RenderCamera(CameraDS::ECapture_Mode_Preview))
+			break;
 
+		camera_->SetCallBack(this);
 		current_camera_status_ = ECameraStatus_Open;
 		ReceiveLiveTriggered();
 		bReturn = true;
@@ -80,17 +109,14 @@ bool ImageViewQView::CloseCamera()
 	bool bReturn = false;
 	do
 	{
-		if (!camera_->Terminate())
-			break;
-		//current_camera_status_ = ECameraStatus_Close;
+		if (camera_)
+		{
+			if (!camera_->Terminate())
+				break;
+		}
 		bReturn = true;
 	} while (false);
 	return bReturn;
-}
-
-void ImageViewQView::SetGrabImageCallBack(ISampleGrabberCB * callback)
-{
-	grabimage_callback_function_ = callback;
 }
 
 void ImageViewQView::DisplayImage(cv::Mat image_rgb, cv::Mat image_depth, cv::Mat image_ir)
@@ -307,53 +333,74 @@ void ImageViewQView::on_measureCircle_clicked()
 
 void ImageViewQView::ReceiveLiveTriggered()
 {
-	if (camera_->Run())
+	if (camera_)
 	{
-		if (event_handler_)
+		if (camera_->Run())
 		{
-			event_handler_->Run();
+			if (event_handler_)
+			{
+				event_handler_->Run();
+			}
 		}
+		current_camera_status_ = ECameraStatus_Live;
 	}
-	current_camera_status_ = ECameraStatus_Live;
 }
 
 void ImageViewQView::ReceivePauseTriggered()
 {
-	if (camera_->Pause())
+	if (camera_)
 	{
-		if (event_handler_)
+		if (camera_->Pause())
 		{
-			event_handler_->Pause();
+			if (event_handler_)
+			{
+				event_handler_->Pause();
+			}
 		}
+		current_camera_status_ = ECameraStatus_Pause;
 	}
-	current_camera_status_ = ECameraStatus_Pause;
 }
 
 void ImageViewQView::ReceiveStopTriggered()
 {
-	if (camera_->Stop())
+	if (camera_)
 	{
-		if (event_handler_)
+		if (camera_->Stop())
 		{
-			event_handler_->Stop();
+			if (event_handler_)
+			{
+				event_handler_->Stop();
+			}
 		}
+		current_camera_status_ = ECameraStatus_Stop;
 	}
-	current_camera_status_ = ECameraStatus_Stop;
 }
 
 void ImageViewQView::ReceiveCaptureFilterTriggered()
 {
-	camera_->ShowCameraCaptureFilterDialog();
+	if (camera_)
+	{
+		camera_->ShowCameraCaptureFilterDialog();
+	}
 }
 
 void ImageViewQView::ReceiveCapturePinTriggered()
 {
-	camera_->ShowCmaeraCapturePinDialog();
+	if (camera_)
+	{
+		camera_->ShowCmaeraCapturePinDialog();
+	}
 }
 
 void ImageViewQView::ReceiveHideToolBarTriggered()
 {
 	imageview_toolbar_->hide();
+}
+
+void ImageViewQView::ReceiveTimeout()
+{
+	ZoomFit();
+	updata_view_timer_.stop();
 }
 
 void ImageViewQView::InitializeUI()
@@ -371,6 +418,7 @@ void ImageViewQView::InitializeUI()
 
 void ImageViewQView::BuildConnect()
 {
+	connect(imageview_toolbar_.get(), SIGNAL(send_display_mode_changed(int)), this, SLOT(ReceiveDisplayModeChanged(int)));
 	connect(imageview_toolbar_.get(), SIGNAL(send_open_camera_triggered()), this, SLOT(ReceiveOpenCameraTriggered()));
 	connect(imageview_toolbar_.get(), SIGNAL(send_close_camera_triggered()), this, SLOT(ReceiveCloseCameraTriggered()));
 	connect(imageview_toolbar_.get(), SIGNAL(send_live_triggered()), this, SLOT(ReceiveLiveTriggered()));
@@ -379,6 +427,8 @@ void ImageViewQView::BuildConnect()
 	connect(imageview_toolbar_.get(), SIGNAL(send_capture_filter_triggered()), this, SLOT(ReceiveCaptureFilterTriggered()));
 	connect(imageview_toolbar_.get(), SIGNAL(send_capture_pin_triggered()), this, SLOT(ReceiveCapturePinTriggered()));
 	connect(imageview_toolbar_.get(), SIGNAL(send_hide_toolbar_triggered()), this, SLOT(ReceiveHideToolBarTriggered()));
+
+	connect(&updata_view_timer_, SIGNAL(timeout()), this, SLOT(ReceiveTimeout()));
 }
 
 void ImageViewQView::CreateCustomRightButtonMenu()
@@ -477,11 +527,6 @@ void ImageViewQView::ReleasePointer()
 		delete camera_;
 		camera_ = nullptr;
 	}
-	/*if (event_handler_)
-	{
-		delete event_handler_;
-		event_handler_ = nullptr;
-	}*/
 }
 
 void ImageViewQView::RegisterDevice()
@@ -592,6 +637,15 @@ void ImageViewQView::SetImage(cv::Mat image_rgb, cv::Mat image_depth, cv::Mat im
 		LogManager::Write(err_msg);
 		return;
 	}
+}
+
+void ImageViewQView::ReceiveDisplayModeChanged(int current_mode)
+{
+	if (event_handler_)
+	{
+		event_handler_->OnDisplayModeChange(current_mode);
+	}
+	updata_view_timer_.start(80);
 }
 
 void ImageViewQView::ReceiveOpenCameraTriggered()

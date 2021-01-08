@@ -146,9 +146,6 @@
     <ClCompile Include="eventhandler.cpp">
       <Filter>Source Files\EventHandler</Filter>
     </ClCompile>
-    <ClCompile Include="eventhandler_grabimage.cpp">
-      <Filter>Source Files\EventHandler</Filter>
-    </ClCompile>
     <ClCompile Include="event_handler_mai.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -221,9 +218,6 @@
     </QtMoc>
     <QtMoc Include="displayview.h">
       <Filter>Header Files\View</Filter>
-    </QtMoc>
-    <QtMoc Include="eventhandler_grabimage.h">
-      <Filter>Header Files\EventHandler</Filter>
     </QtMoc>
     <QtMoc Include="event_handler_mai.h">
       <Filter>Header Files</Filter>

@@ -1,7 +1,9 @@
 #pragma once
 #include <vector>
 #include <QGraphicsView>
+#include <QTimer>
 #include <opencv.hpp>
+#include <qedit.h>
 #include "imageview_qscene.h"
 #include "imageview_qpixmap.h"
 #include "graphicsrectitem.h"
@@ -9,9 +11,8 @@
 #include "definition_camera.h"
 
 class CameraDS;
-class ISampleGrabberCB;
 class EventHandler;
-class ImageViewQView : public QGraphicsView
+class ImageViewQView : public QGraphicsView, public ISampleGrabberCB
 {
 	Q_OBJECT
 public:
@@ -19,10 +20,15 @@ public:
 	ImageViewQView(QGraphicsScene *scene, QWidget *parent = nullptr);
 	virtual ~ImageViewQView();
 
+	ULONG STDMETHODCALLTYPE AddRef();
+	ULONG STDMETHODCALLTYPE Release();
+	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void** ppvObject);
+	HRESULT STDMETHODCALLTYPE SampleCB(double Time, IMediaSample *pSample);
+	HRESULT STDMETHODCALLTYPE BufferCB(double Time, BYTE *pBuffer, long BufferLen);
+
 	void AddEventHandler(EventHandler *event_handler);
 	bool OpenCamera(const int camera_id, const int widht, const int height, bool is_YUV2 = false);
 	bool CloseCamera();
-	void SetGrabImageCallBack(ISampleGrabberCB *callback);
 	void DisplayImage(cv::Mat image_rgb, cv::Mat image_depth, cv::Mat image_ir);
 
 	void SetQssSheetStyle(QString sheet_style); 
@@ -58,6 +64,7 @@ public slots:
 	void SetImage(cv::Mat mat);//接收图像专用槽函数
 	void SetImage(cv::Mat image_rgb, cv::Mat image_depth, cv::Mat image_ir);//接收图像专用槽函数
 
+	void ReceiveDisplayModeChanged(int current_mode);
 	void ReceiveOpenCameraTriggered();
 	void ReceiveCloseCameraTriggered();
 	void ReceiveLiveTriggered();
@@ -66,6 +73,7 @@ public slots:
 	void ReceiveCaptureFilterTriggered();
 	void ReceiveCapturePinTriggered();
 	void ReceiveHideToolBarTriggered();
+	void ReceiveTimeout();
 private:
 	void InitializeUI();
 	void BuildConnect();
@@ -84,7 +92,6 @@ private:
 	std::shared_ptr<GraphicsRectItem>			imageview_rect_item_;
 	std::shared_ptr<ImageViewQToolBar>			imageview_toolbar_;
 	CameraDS									*camera_ = nullptr;
-	ISampleGrabberCB							*grabimage_callback_function_ = nullptr;
 	EventHandler								*event_handler_ = nullptr;
 
 	cv::Mat m_Image;
@@ -94,6 +101,7 @@ private:
 	std::vector<cv::Mat> container_;
 	cv::Mat combine_image_;
 	volatile bool first_time_to_live_ = true;
+	QTimer updata_view_timer_;
 	ECameraStatus current_camera_status_ = ECameraStatus_NoCamera;
 };
 

@@ -6,7 +6,6 @@
 #include <QKeyEvent>
 #include "widgetui.h"
 #include "titlebar.h"
-#include "eventhandler_grabimage.h"
 #include "event_handler_mai.h"
 #include "logmanager.h"
 #include "ui_imageview.h"
@@ -15,8 +14,7 @@ AngStrong::AngStrong(QWidget *parent)
     : QMainWindow(parent),
 	main_widgets_ui_(new WidgetUI()),
 	titlebar_ui_(new TitleBar()),
-	eventhandler_grabimage_(new EventHandlerGrabImage())
-	,eventhandler_main_(new EventHandlerMain())
+	eventhandler_main_(new EventHandlerMain())
 {
     ui.setupUi(this);
 	InitializeUI();
@@ -47,7 +45,6 @@ void AngStrong::InitializeUI()
 	setDockNestingEnabled(true);//打开Dock嵌套功能
 	//imageview_.setParent(this);
 	imageview_.AddEventHandler(eventhandler_main_);
-	imageview_.SetGrabImageCallBack(eventhandler_grabimage_);
 	imageview_.SetTitle("ImageView00");
 	imageview_.show();
 }
@@ -106,13 +103,10 @@ void AngStrong::CreateDockWindow()
 void AngStrong::BuildConnect()
 {
 	qRegisterMetaType<cv::Mat>("cv::Mat");
-	connect(eventhandler_grabimage_, SIGNAL(send_image(cv::Mat,cv::Mat,cv::Mat)), &imageview_, SLOT(ReceiveImage(cv::Mat,cv::Mat,cv::Mat)));
 	connect(this, SIGNAL(SendSN(QString)), eventhandler_main_, SLOT(ReceiveSN(QString)));
 	connect(eventhandler_main_, SIGNAL(SendPSensorData(QString)), &dispview_, SLOT(ReadPSensorData(QString)));
 	connect(eventhandler_main_, SIGNAL(SendWriteSN(QString)), &dispview_, SLOT(ReceiveWriteSN(QString)));
 	connect(eventhandler_main_, SIGNAL(SendReadSN(QString)), &dispview_, SLOT(ReceiveSN(QString)));
-	connect(eventhandler_main_, SIGNAL(SendMouseInfo(int,int)), eventhandler_grabimage_, SLOT(ReceiveMouseInfo(int,int)));
-	connect(eventhandler_grabimage_, SIGNAL(SendLocationDepth(int,int,float)), &dispview_, SLOT(ReceiveLocationDepth(int,int,float)));
 }
 
 void AngStrong::ReleasePointer()
@@ -126,11 +120,6 @@ void AngStrong::ReleasePointer()
 	{
 		titlebar_ui_->deleteLater();
 		titlebar_ui_ = nullptr;
-	}
-	if (eventhandler_grabimage_)
-	{
-		delete eventhandler_grabimage_;
-		eventhandler_grabimage_ = nullptr;
 	}
 	if (sn_thread_)
 	{

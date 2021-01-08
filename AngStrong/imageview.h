@@ -8,7 +8,6 @@ namespace Ui {
 class ImageView;
 }
 
-class ISampleGrabberCB;
 class EventHandler;
 class ImageView : public QWidget
 {
@@ -20,7 +19,6 @@ public:
 
 	void SetQssSheetStyle(QString sheet_style);
 	void SetTitle(QString title);
-	void SetGrabImageCallBack(ISampleGrabberCB *callback);
 	void AddEventHandler(EventHandler *event_handler);
 protected:
 	virtual bool nativeEvent(const QByteArray &eventType, void *message, long *result) override;
@@ -32,7 +30,6 @@ private:
 	bool CreateBorderEvent(const QByteArray &eventType,void *message,long *result);
 
     Ui::ImageView *ui;
-	ISampleGrabberCB *grabimage_callback_ = nullptr;
 };
 
 #endif // IMAGEVIEW_H

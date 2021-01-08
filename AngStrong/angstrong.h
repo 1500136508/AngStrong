@@ -8,7 +8,6 @@
 
 class WidgetUI;
 class TitleBar;
-class EventHandlerGrabImage;
 class EventHandlerMain;
 class AngStrong : public QMainWindow
 {
@@ -38,7 +37,6 @@ private:
 	TitleBar *titlebar_ui_;
 	ImageView imageview_;
 	DisplayView dispview_;
-	EventHandlerGrabImage *eventhandler_grabimage_ = nullptr;
 	EventHandlerMain    *eventhandler_main_ = nullptr;
 
 	bool is_quite_program_ = false;

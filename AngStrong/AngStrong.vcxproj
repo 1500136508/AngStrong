@@ -112,7 +112,6 @@
     <ClCompile Include="displayview.cpp" />
     <ClCompile Include="EnumSerial.cpp" />
     <ClCompile Include="eventhandler.cpp" />
-    <ClCompile Include="eventhandler_grabimage.cpp" />
     <ClCompile Include="event_handler_mai.cpp" />
     <ClCompile Include="graphicsrectitem.cpp" />
     <ClCompile Include="HalerThread.cpp" />
@@ -156,7 +155,6 @@
     <QtMoc Include="displayview.h" />
     <ClInclude Include="definition_thread.h" />
     <ClInclude Include="EnumSerial.h" />
-    <QtMoc Include="eventhandler_grabimage.h" />
     <ClInclude Include="eventhandler.h" />
     <QtMoc Include="event_handler_mai.h" />
     <ClInclude Include="HalerThread.h" />
